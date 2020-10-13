@@ -58,15 +58,9 @@ pipeline {
                  """
             }
           }
-        }
-        stage('Generate Test Report') {
-          steps {
-            withEnv(["HOME=${env.WORKSPACE}"]) {
-                sh "neoload test-results junitsla"
-            }
-          }
           post {
               always {
+                  sh "neoload test-results junitsla"
                   junit 'junit-sla.xml'
               }
           }
