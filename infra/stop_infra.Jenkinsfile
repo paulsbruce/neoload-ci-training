@@ -23,7 +23,7 @@ pipeline {
       agent {
         dockerfile {
           filename 'JenkinsBuildAgent.Dockerfile'
-          dir 'modules/module1'
+          dir 'infra'
           additionalBuildArgs "--rm --label \"${env.CLI_BRANCH}\""
           args "--add-host ${env.nlw_host}:${env.host_ip}"
         }

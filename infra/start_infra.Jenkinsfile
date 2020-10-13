@@ -2,7 +2,7 @@ pipeline {
   agent none
 
   environment {
-    CLI_BRANCH="topic-docker-command"
+    docker_label="nlclidocker"
     zone_id="defaultzone"
     nlw_host="nlweb.shared"
     api_url="http://${env.nlw_host}:8080"
@@ -14,7 +14,7 @@ pipeline {
       steps {
         cleanWs()
         script {
-          try { sh "docker rmi \$(docker images -a --filter=\"label=${env.CLI_BRANCH}\" --format=\"{{.ID}}\") --force" }
+          try { sh "docker rmi \$(docker images -a --filter=\"label=${env.docker_label}\" --format=\"{{.ID}}\") --force" }
           catch(error) {}
           sh "uname -a"
           env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
@@ -25,8 +25,8 @@ pipeline {
       agent {
         dockerfile {
           filename 'JenkinsBuildAgent.Dockerfile'
-          dir 'modules/module1'
-          additionalBuildArgs "--rm --label \"${env.CLI_BRANCH}\""
+          dir 'infra'
+          additionalBuildArgs "--rm --label \"${env.docker_label}\""
           args "--add-host ${env.nlw_host}:${env.host_ip}"
         }
       }
