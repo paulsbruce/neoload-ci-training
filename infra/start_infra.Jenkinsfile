@@ -42,7 +42,7 @@ pipeline {
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
                 sh "neoload login --url ${env.api_url} $NLW_TOKEN"
                 sh "neoload test-settings --zone ${env.zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness'"
-                sh "neoload docker attach --addhosts='nlweb.shared=${env.host_ip}'"
+                sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
                 sh "neoload status"
               }
             }
