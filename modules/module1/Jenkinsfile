@@ -62,7 +62,9 @@ pipeline {
               always {
                 withEnv(["HOME=${env.WORKSPACE}"]) {
                   sh "neoload test-results junitsla"
-                  junit '${HOME}/junit-sla.xml'
+                  sh "ls -latr"
+                  sh "ls -latr ${HOME}"
+                  junit 'junit-sla.xml'
                 }
               }
           }
