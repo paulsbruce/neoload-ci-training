@@ -60,8 +60,10 @@ pipeline {
           }
           post {
               always {
+                withEnv(["HOME=${env.WORKSPACE}"]) {
                   sh "neoload test-results junitsla"
                   junit 'junit-sla.xml'
+                }
               }
           }
         }
