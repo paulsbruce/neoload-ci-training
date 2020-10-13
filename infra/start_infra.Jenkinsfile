@@ -27,7 +27,7 @@ pipeline {
           filename 'JenkinsBuildAgent.Dockerfile'
           dir 'infra'
           additionalBuildArgs "--rm --label \"${env.docker_label}\""
-          args "--privileged -v /var/run/docker.sock:/var/run/docker.sock --add-host ${env.nlw_host}:${env.host_ip}"
+          args "-u root --privileged -v /var/run/docker.sock:/var/run/docker.sock --add-host ${env.nlw_host}:${env.host_ip}"
         }
       }
       stages {
