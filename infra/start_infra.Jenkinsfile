@@ -24,7 +24,7 @@ pipeline {
     stage('Attach Worker') {
       agent {
         dockerfile {
-          filename 'JenkinsBuildAgent.Dockerfile'
+          filename 'JenkinsBuildAgent-docker.Dockerfile'
           dir 'infra'
           additionalBuildArgs "--rm --label \"${env.docker_label}\""
           args "-u root --privileged -v /var/run/docker.sock:/var/run/docker.sock --add-host ${env.nlw_host}:${env.host_ip}"
