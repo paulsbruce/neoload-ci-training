@@ -1,0 +1,73 @@
+pipeline {
+  agent none
+
+  parameters {
+    string(defaultValue: "${NEOLOAD_CLI_NLW_TOKEN}", description: 'Neoload Web Token', name: 'token')
+    string(defaultValue: "${NEOLOAD_CLI_ZONE_STATIC}", description: 'Zone identifier', name: 'zone_id')
+    string(defaultValue: "${NEOLOAD_CLI_NLW_URL}", description: 'NeoLoad Web Api Url', name: 'api_url')
+  }
+  environment {
+    CLI_BRANCH="master"
+  }
+
+  stages {
+    stage ('Prep workspace') {
+      agent any
+      steps {
+        cleanWs()
+        script {
+          try { sh "docker rmi \$(docker images -a --filter=\"label=${env.CLI_BRANCH}\" --format=\"{{.ID}}\") --force" }
+          catch(error) {}
+        }
+      }
+    }
+    stage('Attach Worker') {
+      agent {
+        dockerfile {
+          filename 'JenkinsBuildAgent.Dockerfile'
+          dir 'modules/module1'
+          additionalBuildArgs "--rm --label \"${env.CLI_BRANCH}\""
+        }
+      }
+      stages {
+        stage('Prepare docker') {
+          steps {
+            sh 'neoload --version'
+          }
+        }
+        stage('Prepare Neoload test') {
+          steps {
+            withEnv(["HOME=${env.WORKSPACE}"]) {
+              sh """neoload \
+                     login --url ${params.api_url} ${params.token} \
+                     test-settings --zone ${params.zone_id} --lgs 1 --scenario sanityScenario createorpatch "example-Jenkins-module1" \
+                     project --path tests/neoload_projects/example_1/ upload
+                """
+            }
+          }
+        }
+        stage('Run Test') {
+          steps {
+            withEnv(["HOME=${env.WORKSPACE}"]) {
+              sh """neoload run \
+                  --as-code default.yaml,slas/uat.yaml
+                 """
+            }
+          }
+        }
+        stage('Generate Test Report') {
+          steps {
+            withEnv(["HOME=${env.WORKSPACE}"]) {
+                sh "neoload test-results junitsla"
+            }
+          }
+          post {
+              always {
+                  junit 'junit-sla.xml'
+              }
+          }
+        }
+      }
+    }
+  }
+}
