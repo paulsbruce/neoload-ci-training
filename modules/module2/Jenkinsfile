@@ -42,19 +42,20 @@ pipeline {
             sh 'neoload --version'
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
-
-              script {
-                if(env.zone_id.trim().length() < 1) // dynamically pick a zone
-                  env.zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length>0) and (.loadgenerators|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true)
-                if(env.zone_id.trim().length() < 1)
-                  error "Could not find a suitable zone with appropriate resources"
-              }
             }
           }
         }
         stage('Prepare Neoload test') {
           steps {
-            sh "neoload test-settings --zone ${env.zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-module1'"
+            script {
+              def zone_id = env.zone_id
+              if(zone_id.trim().toLowerCase().equals("null")) zone_id = ""
+
+              if(zone_id.trim().length() < 1) // dynamically pick a zone
+                zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length>0) and (.loadgenerators|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
+
+              sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-module1'"
+            }
             sh "neoload project --path tests/neoload_projects/example_1/ upload"
             sh "neoload status"
           }
