@@ -27,25 +27,23 @@ pipeline {
           filename 'JenkinsBuildAgent-docker.Dockerfile'
           dir 'infra'
           additionalBuildArgs "--rm --label \"${env.docker_label}\""
-          args "-u root --privileged -v /var/run/docker.sock:/var/run/docker.sock --add-host ${env.nlw_host}:${env.host_ip}"
+          args "-u root --privileged -v /var/run/docker.sock:/var/run/docker.sock --add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE}"
         }
       }
       stages {
         stage('Prepare docker') {
           steps {
-            sh 'neoload --version'
+            withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
+              sh "neoload login --url ${env.api_url} $NLW_TOKEN"
+              sh 'neoload --version'
+            }
           }
         }
         stage('Prepare Neoload test') {
           steps {
-            withEnv(["HOME=${env.WORKSPACE}"]) {
-              withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
-                sh "neoload login --url ${env.api_url} $NLW_TOKEN"
-                sh "neoload test-settings --zone ${env.zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness'"
-                sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
-                sh "neoload status"
-              }
-            }
+            sh "neoload test-settings --zone ${env.zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness'"
+            sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
+            sh "neoload status"
           }
         }
       }
