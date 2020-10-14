@@ -21,14 +21,28 @@ pipeline {
         }
       }
     }
+    stage ('Check/Build Docker Agent') {
+      agent any
+      steps {
+        script {
+          imgCount = sh(script: "docker images -a --filter='label=${env.docker_label}' --format='{{.ID}}' | wc -l", returnStdout: true)
+          if(imgCount < 1)
+            docker.build("${env.docker_label}:latest", "--rm --label '${env.docker_label}' -f JenkinsBuildAgent.Dockerfile ./infra")
+        }
+      }
+    }
     stage('Attach Worker') {
       agent {
-        dockerfile {
+        docker {
+          image "${env.docker_label}:latest"
+          args "--add-host ${env.nlw_host}:${env.host_ip}"
+        }
+        /*dockerfile {
           filename 'JenkinsBuildAgent.Dockerfile'
           dir 'infra'
           additionalBuildArgs "--rm --label \"${env.docker_label}\""
           args "--add-host ${env.nlw_host}:${env.host_ip}"
-        }
+        }*/
       }
       stages {
         stage('Prepare docker') {
