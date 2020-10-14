@@ -49,7 +49,7 @@ pipeline {
           steps {
             script {
               echo "zone_id: " + env.zone_id
-              if(env.zone_id==null || env.zone_id=="null") env.zone_id = ""
+              if("${env.zone_id}"=="null") env.zone_id = ""
               echo "zone_id: " + env.zone_id
               if(env.zone_id.trim().length() < 1) // dynamically pick a zone
                 env.zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true)
