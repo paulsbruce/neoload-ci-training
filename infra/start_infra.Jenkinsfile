@@ -31,7 +31,7 @@ pipeline {
         }
       }
       stages {
-        stage('Prepare docker') {
+        stage('NeoLoad login') {
           steps {
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
@@ -39,7 +39,7 @@ pipeline {
             }
           }
         }
-        stage('Prepare Neoload test') {
+        stage('Start docker load infra') {
           steps {
             sh "neoload test-settings --zone ${env.zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness'"
             sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
