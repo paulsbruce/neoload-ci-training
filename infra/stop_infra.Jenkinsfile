@@ -2,10 +2,10 @@ pipeline {
   agent none
 
   environment {
-    CLI_BRANCH="topic-docker-command"
-    zone_id="defaultzone"
+    docker_label="nlclidocker"
     nlw_host="nlweb.shared"
     api_url="http://${env.nlw_host}:8080"
+    zone_id="${ZONE_ID}"
   }
 
   stages {
@@ -15,17 +15,25 @@ pipeline {
         cleanWs()
         script {
           sh "uname -a"
-          env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true).trim()
+          env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
+        }
+      }
+    }
+    stage ('Check/Build Docker Agent') {
+      agent any
+      steps {
+        script {
+          imgCount = sh(script: "docker images -a --filter='label=${env.docker_label}' --format='{{.ID}}' | wc -l", returnStdout: true).toInteger()
+          if(imgCount < 1)
+            docker.build("${env.docker_label}:latest", "--rm --label '${env.docker_label}' -f ./infra/JenkinsBuildAgent-docker.Dockerfile .")
         }
       }
     }
     stage('Attach Worker') {
       agent {
-        dockerfile {
-          filename 'JenkinsBuildAgent-docker.Dockerfile'
-          dir 'infra'
-          additionalBuildArgs "--rm --label \"${env.CLI_BRANCH}\""
-          args "-u root --privileged -v /var/run/docker.sock:/var/run/docker.sock --add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE}"
+        docker {
+          image "${env.docker_label}:latest"
+          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE}"
         }
       }
       stages {

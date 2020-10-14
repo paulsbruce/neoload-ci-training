@@ -3,9 +3,9 @@ pipeline {
 
   environment {
     docker_label="nljenkinsagent"
-    zone_id="defaultzone"
     nlw_host="nlweb.shared"
     api_url="http://${env.nlw_host}:8080"
+    zone_id="${ZONE_ID}"
   }
 
   stages {
@@ -23,7 +23,6 @@ pipeline {
       agent any
       steps {
         script {
-          //try { sh "docker rmi \$(docker images -a --filter=\"label=${env.docker_label}\" --format=\"{{.ID}}\") --force" } catch(error) {}
           imgCount = sh(script: "docker images -a --filter='label=${env.docker_label}' --format='{{.ID}}' | wc -l", returnStdout: true).toInteger()
           if(imgCount < 1)
             docker.build("${env.docker_label}:latest", "--rm --label '${env.docker_label}' -f ./infra/JenkinsBuildAgent.Dockerfile .")
@@ -34,47 +33,40 @@ pipeline {
       agent {
         docker {
           image "${env.docker_label}:latest"
-          args "--add-host ${env.nlw_host}:${env.host_ip}"
+          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE}"
         }
-        /*dockerfile {
-          filename 'JenkinsBuildAgent.Dockerfile'
-          dir 'infra'
-          additionalBuildArgs "--rm --label \"${env.docker_label}\""
-          args "--add-host ${env.nlw_host}:${env.host_ip}"
-        }*/
       }
       stages {
-        stage('Prepare docker') {
+        stage('Prepare agent') {
           steps {
             sh 'neoload --version'
+            withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
+              sh "neoload login --url ${env.api_url} $NLW_TOKEN"
+
+              if(env.zone_id.trim().length() < 1) // dynamically pick a zone
+                env.zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length>0) and (.loadgenerators|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true)
+              if(env.zone_id.trim().length() < 1)
+                env.zone_id = "defaultzone"
+            }
           }
         }
         stage('Prepare Neoload test') {
           steps {
-            withEnv(["HOME=${env.WORKSPACE}"]) {
-              withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
-                sh "neoload login --url ${env.api_url} $NLW_TOKEN"
-                sh "neoload test-settings --zone ${env.zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-module1'"
-                sh "neoload status"
-                sh "neoload project --path tests/neoload_projects/example_1/ upload"
-              }
-            }
+            sh "neoload test-settings --zone ${env.zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-module1'"
+            sh "neoload status"
+            sh "neoload project --path tests/neoload_projects/example_1/ upload"
           }
         }
         stage('Run Test') {
           steps {
-            withEnv(["HOME=${env.WORKSPACE}"]) {
-              sh "neoload run"
-            }
+            sh "neoload run"
           }
           post {
-              always {
-                withEnv(["HOME=${env.WORKSPACE}"]) {
-                  sh "neoload test-results junitsla"
-                  sh "sed -i 's/\\<br\\/\\>/\\n/g' junit-sla.xml"
-                  junit 'junit-sla.xml'
-                }
-              }
+            always {
+              sh "neoload test-results junitsla"
+              sh "sed -i 's/\\<br\\/\\>/\\n/g' junit-sla.xml"
+              junit 'junit-sla.xml'
+            }
           }
         }
       }
