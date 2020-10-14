@@ -24,7 +24,7 @@ sla_profiles: # defaults for dev/qa systems; can be overridden by additional sla
 - name: geo_3rdparty_sla
   description: Avg Resp Time >=1000ms >= 25000ms for cached queries
   thresholds:
-  - avg-resp-time warn >= 1000ms per interval
+  - avg-resp-time warn >= 25000ms per interval
   - error-rate warn >= 10% per test
 
 populations:
