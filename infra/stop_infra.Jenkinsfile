@@ -47,7 +47,6 @@ pipeline {
         }
         stage('Stop docker load infra') {
           steps {
-            sh "neoload test-settings --zone ${env.zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness'"
             sh "neoload docker --all detach"
           }
         }

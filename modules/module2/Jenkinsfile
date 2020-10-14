@@ -43,10 +43,12 @@ pipeline {
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
 
-              if(env.zone_id.trim().length() < 1) // dynamically pick a zone
-                env.zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length>0) and (.loadgenerators|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true)
-              if(env.zone_id.trim().length() < 1)
-                error "Could not find a suitable zone with appropriate resources"
+              script {
+                if(env.zone_id.trim().length() < 1) // dynamically pick a zone
+                  env.zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length>0) and (.loadgenerators|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true)
+                if(env.zone_id.trim().length() < 1)
+                  error "Could not find a suitable zone with appropriate resources"
+              }
             }
           }
         }
