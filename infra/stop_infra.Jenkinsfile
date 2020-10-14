@@ -33,7 +33,7 @@ pipeline {
       agent {
         docker {
           image "${env.docker_label}:latest"
-          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE}"
+          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -u root --privileged -v /var/run/docker.sock:/var/run/docker.sock"
         }
       }
       stages {

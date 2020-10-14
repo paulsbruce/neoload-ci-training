@@ -33,7 +33,7 @@ pipeline {
       agent {
         docker {
           image "${env.docker_label}:latest"
-          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE}"
+          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -u root --privileged -v /var/run/docker.sock:/var/run/docker.sock"
         }
       }
       stages {
@@ -51,7 +51,7 @@ pipeline {
               if(env.zone_id.trim().length() < 1) // dynamically pick a zone
                 env.zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true)
             }
-            
+
             sh "neoload test-settings --zone ${env.zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness'"
             sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
           }
