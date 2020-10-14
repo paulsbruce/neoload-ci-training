@@ -41,9 +41,11 @@ pipeline {
             withEnv(["HOME=${env.WORKSPACE}"]) {
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
                 sh "neoload login --url ${env.api_url} $NLW_TOKEN"
+                sh "neoload status"
                 sh "neoload test-settings --zone ${env.zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-module1'"
                 sh "neoload status"
                 sh "neoload project --path tests/neoload_projects/example_1/ upload"
+                sh "neoload status"
               }
             }
           }
@@ -51,7 +53,9 @@ pipeline {
         stage('Run Test') {
           steps {
             withEnv(["HOME=${env.WORKSPACE}"]) {
-              sh "neoload run"
+              sh """neoload run \
+                  --as-code default.yaml,slas/uat.yaml
+                 """
             }
           }
           post {
