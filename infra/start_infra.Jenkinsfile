@@ -15,7 +15,7 @@ pipeline {
         cleanWs()
         script {
           sh "uname -a"
-          env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
+          env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true).trim()
         }
       }
     }
@@ -50,7 +50,7 @@ pipeline {
             script {
               def zone_id = env.zone_id
               if(zone_id.trim().toLowerCase().equals("null")) zone_id = ""
-              
+
               if(zone_id.trim().length() < 1) // dynamically pick a zone
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
