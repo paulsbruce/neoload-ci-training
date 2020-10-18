@@ -65,7 +65,10 @@ pipeline {
         }
         stage('Run Test') {
           steps {
-            sh "neoload run --detached"
+          """neoload run \
+              --detached \
+              --as-code default.yaml,slas/uat.yaml
+             """
 
             sh 'echo "Detached Exit Code was: $?"'
 
