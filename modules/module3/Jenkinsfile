@@ -87,8 +87,7 @@ pipeline {
           post {
               always {
                 sh "neoload test-results junitsla"
-                sh "sed -i 's/\\<br\\/\\>/\\n/g' junit-sla.xml"
-                junit 'junit-sla.xml'
+                junit testResults: 'junit-sla.xml', allowEmptyResults: true
               }
           }
         }
