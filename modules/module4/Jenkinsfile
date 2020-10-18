@@ -75,6 +75,11 @@ servers:
   scheme: https
             """)
 
+            writeFile(file: "d.includes.yaml", text:"""
+includes:
+- paths/geosearch_get_mock.yaml
+            """)
+
             writeFile(file: "d.scenarios.yaml", text:"""
 populations:
 - name: popGetsMock
@@ -113,7 +118,7 @@ variables:
         }
         stage('Run Test') {
           steps {
-            sh "neoload run --as-code default.yaml,d.servers.yaml,d.scenarios.yaml,d.variables.yaml"
+            sh "neoload run --as-code default.yaml,d.servers.yaml,d.includes.yaml,d.scenarios.yaml,d.variables.yaml"
           }
           post {
               always {
