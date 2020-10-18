@@ -87,14 +87,16 @@ pipeline {
               always {
                 sh 'echo "Final Exit Code was: $?"'
 
+                script {
                 try {
                 sleep(time:5,unit:"SECONDS")
-                
+
                 sh "neoload test-results summary cur > neoload-summary.txt"
                 sh "cat neoload-summary.txt"
                 } catch(error) {
                   print "Finalization error"
                   print error
+                }
                 }
 
                 sh "neoload test-results junitsla"
