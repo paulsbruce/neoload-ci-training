@@ -100,7 +100,7 @@ variables:
     value: 'place'
             """)
 
-            writeFile(file: "d.includes.yaml", text:"""
+            writeFile(file: "d.inlude.yaml", text:"""
 includes:
 - paths/geosearch_get_mock.yaml
 - d.slervers.yaml
