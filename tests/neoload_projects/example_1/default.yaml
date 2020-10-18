@@ -14,6 +14,12 @@ variables:
     scope: global
     order: any
     out_of_value: cycle
+- constant:
+    name: geoformat
+    value: json
+- constant:
+    name: geocontains
+    value: "place_id"
 
 servers:
 - name: geolookup_host

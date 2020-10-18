@@ -8,8 +8,10 @@ user_paths:
         description: Call Open Street Maps to translate city names to lat/lon
         steps:
         - request:
-            url: /search?format=json&q=${cities.City}
+            url: /search?format=${geoformat}&q=${cities.City}
             server: geolookup_host
             sla_profile: geo_3rdparty_sla
+            assertions:
+            - contains: ${geocontains}
 
     - delay: 1s
