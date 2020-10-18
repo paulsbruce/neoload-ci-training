@@ -91,6 +91,8 @@ pipeline {
                 try {
                 sleep(time:5,unit:"SECONDS")
 
+                sh 'neoload test-results summary cur'
+
                 sh "neoload test-results summary cur > neoload-summary.txt"
                 sh "cat neoload-summary.txt"
                 } catch(error) {
