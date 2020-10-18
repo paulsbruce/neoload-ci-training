@@ -103,7 +103,7 @@ variables:
             writeFile(file: "d.includes.yaml", text:"""
 includes:
 - paths/geosearch_get_mock.yaml
-- d.servers.yaml
+- d.slervers.yaml
 - d.scenarios.yaml
 - d.variables.yaml
             """)
