@@ -67,7 +67,7 @@ pipeline {
           steps {
             sh "neoload run --detached"
 
-            sh "echo \"Detached Exit Code was: $?\""
+            sh 'echo "Detached Exit Code was: $?"'
 
             script {
               logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
@@ -79,7 +79,7 @@ pipeline {
           }
           post {
               always {
-                sh "echo \"Final Exit Code was: $?\""
+                sh 'echo "Final Exit Code was: $?"'
 
                 sh "neoload test-results summary > neoload-summary.txt"
                 sh "cat neoload-summary.txt"
