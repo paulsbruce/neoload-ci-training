@@ -87,7 +87,7 @@ pipeline {
               always {
                 sh 'echo "Final Exit Code was: $?"'
 
-                sh "neoload test-results summary > neoload-summary.txt"
+                sh "neoload test-results summary cur > neoload-summary.txt"
                 sh "cat neoload-summary.txt"
 
                 sh "neoload test-results junitsla"
