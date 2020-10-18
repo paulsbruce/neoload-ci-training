@@ -67,7 +67,7 @@ pipeline {
           steps {
             sh "neoload run --detached"
 
-            sh "echo \"Detached Exit Code was: \"$?"
+            sh "echo \"Detached Exit Code was: $?\""
 
             script {
               logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
