@@ -100,7 +100,7 @@ variables:
     value: 'place'
             """)
 
-            writeFile(file: "d.inlude.yaml", text:"""
+            writeFile(file: "d.inludes.yaml", text:"""
 includes:
 - paths/geosearch_get_mock.yaml
 - d.slervers.yaml
@@ -122,7 +122,7 @@ includes:
         }
         stage('Run Test') {
           steps {
-            sh "neoload run --as-code default.yaml,d.includes.yaml"
+            sh "neoload run --as-code default.yaml,d.include.yaml"
           }
           post {
               always {
