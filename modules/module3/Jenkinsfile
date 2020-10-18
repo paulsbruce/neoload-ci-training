@@ -65,12 +65,25 @@ pipeline {
         }
         stage('Run Test') {
           steps {
-            sh """neoload run \
-                --as-code default.yaml,slas/uat.yaml
-               """
+            sh "neoload run --detached"
+
+            sh "echo \"Detached Exit Code was: \"$?"
+
+            script {
+              logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
+              echo "Logs url: ${logs_url}"
+            }
+
+            sh "neoload fastfail cur --max-failure 25"
+            sh "neoload wait"
           }
           post {
               always {
+                sh "echo \"Final Exit Code was: \"$?"
+
+                sh "neoload test-results summary > neoload-summary.txt"
+                sh "cat neoload-summary.txt"
+
                 sh "neoload test-results junitsla"
                 sh "sed -i 's/\\<br\\/\\>/\\n/g' junit-sla.xml"
                 junit 'junit-sla.xml'
