@@ -59,16 +59,40 @@ pipeline {
 
               sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-module5'"
             }
+          }
+        }
+        stage('Prepare Test Assets') {
+          steps {
+            writeFile(file: "d.sanity.yaml", text:"""
+scenarios:
+- name: sanityScenario
+  populations:
+  - name: popGets
+    constant_load:
+      users: 2
+      duration: 30s
+            """)
+            stash includes: 'd.*.yaml', name: 'dynamics'
+          }
+        }
+        stage('Upload Test Assets') {
+          steps {
+            dir('tests/neoload_projects/example_1/') {
+              unstash 'dynamics'
+            }
             sh "neoload project --path tests/neoload_projects/example_1/ upload"
             sh "neoload status"
           }
         }
         stage('Run a sanity scenario') {
           steps {
+            dir('tests/neoload_projects/example_1/') {
+              unstash 'dynamics'
+            }
             script {
               sanityCode = 3 // default to something absurd
               try {
-                sanityCode = sh(script: "neoload run --scenario sanityScenario --as-code default.yaml", returnStatus: true)
+                sanityCode = sh(script: "neoload run --scenario sanityScenario --as-code default.yaml,d.sanity.yaml", returnStatus: true)
               } catch(error) {
                 error "Sanity test kickoff error ${error}"
               } finally {
