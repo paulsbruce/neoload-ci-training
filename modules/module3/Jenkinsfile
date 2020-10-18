@@ -79,7 +79,7 @@ pipeline {
           }
           post {
               always {
-                sh "echo \"Final Exit Code was: \"$?"
+                sh "echo \"Final Exit Code was: $?\""
 
                 sh "neoload test-results summary > neoload-summary.txt"
                 sh "cat neoload-summary.txt"
