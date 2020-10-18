@@ -66,15 +66,14 @@ pipeline {
         stage('Run a sanity scenario') {
           steps {
             script {
+              sanityCode = 3 // default to something absurd
               try {
-                sh "neoload run --scenario sanityScenario --as-code default.yaml"
+                sanityCode = sh(script: "neoload run --scenario sanityScenario --as-code default.yaml", returnStatus: true)
               } catch(error) {
                 error "Sanity test kickoff error ${error}"
-              }
-              try {
-                env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
-                print "Final status code was ${env.exitCode}"
-                if(env.exitCode > 1)
+              } finally {
+                print "Sanity status code was ${sanityCode}"
+                if(sanityCode > 1)
                   error "Sanity test failed so not proceeding to full test!"
               }
             }
