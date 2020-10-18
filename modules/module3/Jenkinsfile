@@ -91,6 +91,8 @@ pipeline {
                 try {
                 sleep(time:5,unit:"SECONDS")
 
+                summary = sh(script: "neoload test-results summary", returnStdout: true).trim()
+                echo "Summs: ${summary}"
                 sh 'neoload test-results summary cur'
 
                 sh "neoload test-results summary cur > neoload-summary.txt"
