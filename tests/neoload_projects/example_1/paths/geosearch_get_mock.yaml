@@ -1,0 +1,17 @@
+user_paths:
+- name: ex_2_0_geosearch_get_mock
+  actions:
+    steps:
+
+    - transaction:
+        name: External Geo-lookup
+        description: Call Open Street Maps to translate city names to lat/lon
+        steps:
+        - request:
+            url: /get?format=${geoformat}&q=${cities.City}&dummy=place
+            server: geolookup_mock_host
+            sla_profile: geo_3rdparty_sla
+            assertions:
+            - contains: ${geocontains}
+
+    - delay: 1s
