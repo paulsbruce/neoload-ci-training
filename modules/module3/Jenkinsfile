@@ -75,16 +75,13 @@ pipeline {
             script {
               logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
               echo "Logs url: ${logs_url}"
-
-              try {
-                sh "neoload fastfail --max-failure 25 slas cur"
-              } finally {
-                sh "neoload wait cur"
-              }
             }
+
+            sh "neoload fastfail --max-failure 25 slas cur"
           }
           post {
               always {
+                sh "neoload wait cur"
                 sh 'echo "Final Exit Code was: $?"'
 
                 sh "neoload test-results summary > neoload-summary.txt"
