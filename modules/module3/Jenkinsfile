@@ -65,7 +65,7 @@ pipeline {
         }
         stage('Run Test') {
           steps {
-          """neoload run \
+            sh """neoload run \
               --detached \
               --as-code default.yaml,slas/uat.yaml
              """
