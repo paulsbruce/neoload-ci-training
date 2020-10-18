@@ -74,7 +74,7 @@ pipeline {
               echo "Logs url: ${logs_url}"
             }
 
-            sh "neoload fastfail cur --max-failure 25"
+            sh "neoload fastfail --max-failure 25 slas cur"
             sh "neoload wait"
           }
           post {
