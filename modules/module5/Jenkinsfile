@@ -98,9 +98,7 @@ pipeline {
                       logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
                       echo "Logs url: ${logs_url}"
 
-                      try {
-                        sh "neoload fastfail --max-failure 25 slas cur"
-                      }
+                      sh "neoload fastfail --max-failure 25 slas cur"
                     }
                   }
                 }
