@@ -99,6 +99,8 @@ scenarios:
                 print "Sanity status code was ${sanityCode}"
                 if(sanityCode > 1)
                   error "Sanity test failed so not proceeding to full test!"
+                else
+                  sh "neoload test-results delete cur" // get rid of successful sanity run results
               }
             }
           }
