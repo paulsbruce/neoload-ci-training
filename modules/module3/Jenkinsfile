@@ -75,28 +75,27 @@ pipeline {
             script {
               logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
               echo "Logs url: ${logs_url}"
-            }
 
-            sh "neoload fastfail --max-failure 25 slas cur"
+              try {
+                sh "neoload fastfail --max-failure 25 slas cur"
+              } finally {
+                sh "neoload wait cur"
+              }
+            }
           }
           post {
               always {
-                sh "neoload wait cur"
+                sh 'echo "Final Exit Code was: $?"'
+
+                sh "neoload test-results summary > neoload-summary.txt"
+                sh "cat neoload-summary.txt"
+
+                sh "neoload test-results junitsla"
+                sh "sed -i 's/\\<br\\/\\>/\\n/g' junit-sla.xml"
+                junit 'junit-sla.xml'
               }
           }
         }
-      }
-      post {
-          always {
-            sh 'echo "Final Exit Code was: $?"'
-
-            sh "neoload test-results summary > neoload-summary.txt"
-            sh "cat neoload-summary.txt"
-
-            sh "neoload test-results junitsla"
-            sh "sed -i 's/\\<br\\/\\>/\\n/g' junit-sla.xml"
-            junit 'junit-sla.xml'
-          }
       }
     }
   }
