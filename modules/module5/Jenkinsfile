@@ -68,6 +68,8 @@ pipeline {
             script {
               try {
                 sh "neoload run --scenario sanityScenario --as-code default.yaml"
+              } catch(error) {
+                error "Sanity test kickoff error ${error}"
               }
               try {
                 env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
