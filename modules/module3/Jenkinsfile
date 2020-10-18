@@ -79,7 +79,7 @@ pipeline {
               try {
                 sh "neoload fastfail --max-failure 25 slas cur"
               } finally {
-                sh "neoload wait"
+                sh "neoload wait cur"
               }
             }
           }
