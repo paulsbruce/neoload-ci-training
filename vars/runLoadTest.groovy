@@ -1,4 +1,4 @@
-def call(Map args) {
+def call(Map params) {
   pipeline {
     agent none
 
@@ -7,15 +7,15 @@ def call(Map args) {
       nlw_host="nlweb.shared"
       api_url="http://${env.nlw_host}:8080"
 
-      zone_id = args.get('zone',"${ZONE_ID}")
-      full_test_max_vus = args.get('vus',5)
-      full_test_duration_mins = args.get('duration',1)
-      sanity_scenario_name = args.get('sanity',null)
-      load_scenario_name = args.get('scenario',null)
-      test_settings_name = args.get('job','example-Jenkins')
-      project_yaml_file_and_comma = args.get('project_yaml',null)
-      lg_count = args.get('lgs',1)
-      test_dir = args.get('test_dir','.')
+      zone_id = params.get('zone',"${ZONE_ID}")
+      full_test_max_vus = params.get('vus',5)
+      full_test_duration_mins = params.get('duration',1)
+      sanity_scenario_name = params.get('sanity',null)
+      load_scenario_name = params.get('scenario',null)
+      test_settings_name = params.get('job','example-Jenkins')
+      project_yaml_file_and_comma = params.get('project_yaml',null)
+      lg_count = params.get('lgs',1)
+      test_dir = params.get('test_dir','.')
     }
 
     stages {
