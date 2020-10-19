@@ -153,14 +153,16 @@ def call(Map params) {
             stages {
               stage('Kick off test async') {
                 steps {
-                  wrap([$class: 'BuildUser']) {
-                    sh """neoload run \
-                      --scenario \"${env.actual_scenario_name}\" \
-                      --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
-                      --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
-                      --detached \
-                      --as-code ${env.project_yaml_file_and_comma}d.overrides.yaml
-                     """
+                  script {
+                    wrap([$class: 'BuildUser']) {
+                      sh """neoload run \
+                        --scenario \"${env.actual_scenario_name}\" \
+                        --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
+                        --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
+                        --detached \
+                        --as-code ${env.project_yaml_file_and_comma}d.overrides.yaml
+                       """
+                    }
                   }
                 }
               }
