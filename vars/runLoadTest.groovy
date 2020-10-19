@@ -22,7 +22,6 @@ def call(Map params) {
       stage ('Validate inputs') {
         agent any
         steps {
-          sh "printenv"
           script {
             if(env.load_scenario_name == null)
               error "No 'scenario' parameter specified!"
@@ -46,6 +45,7 @@ def call(Map params) {
               print "${env.project_yaml_file_and_comma}"
             }
           }
+          sh "printenv"
         }
       }
       stage ('Check/Build Docker Agent') {
