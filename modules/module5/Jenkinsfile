@@ -6,6 +6,8 @@ pipeline {
     nlw_host="nlweb.shared"
     api_url="http://${env.nlw_host}:8080"
     zone_id="${ZONE_ID}"
+    full_test_max_vus = 5
+    full_test_duration_mins = 3
   }
 
   stages {
@@ -45,7 +47,7 @@ pipeline {
             }
           }
         }
-        stage('Prepare Neoload test') {
+        stage('Prepare Neoload CLI') {
           steps {
             script {
               def zone_id = env.zone_id
@@ -71,6 +73,15 @@ scenarios:
     constant_load:
       users: 2
       duration: 30s
+- name: fullTest
+  populations:
+  - name: popGets
+    rampup_load:
+      min_users: 1
+      max_users: ${full_test_max_vus}
+      increment_users: 2
+      increment_every: 5s
+      duration: ${full_test_duration_mins}m
             """)
             stash includes: 'd.*.yaml', name: 'dynamics'
           }
@@ -150,6 +161,7 @@ scenarios:
             always {
               sh "neoload test-results junitsla"
               junit testResults: 'junit-sla.xml', allowEmptyResults: true
+              archiveArtifacts artifacts: 'd.*.yaml'
             }
           }
         }
