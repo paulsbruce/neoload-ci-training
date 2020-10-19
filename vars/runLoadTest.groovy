@@ -24,7 +24,7 @@ def call(Map params) {
         agent any
         steps {
           script {
-            if(env.load_scenario_name.isEmpty())
+            if(isNullOrEmpty(env.load_scenario_name))
               error "No 'scenario' parameter specified!"
             if(env.lg_count.toInteger() > 2)
               error "You cannot use more than 2 load generators without assistance."
@@ -40,11 +40,11 @@ def call(Map params) {
             env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
             env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
             env.test_settings_name = "${env.agent_name}-${JOB_NAME}"
-            if(env.project_yaml_file != null && "${env.project_yaml_file}".trim().length() > 0) {
+            if(!isNullOrEmpty(env.project_yaml_file)) {
               env.project_yaml_file_and_comma = "${env.project_yaml_file},"
             }
             env.actual_scenario_name = env.default_scenario_name
-            if(!env.load_scenario_name.isEmpty()) {
+            if(!isNullOrEmpty(env.load_scenario_name)) {
               env.actual_scenario_name = env.load_scenario_name
             }
           }
@@ -87,7 +87,7 @@ def call(Map params) {
                 if(zone_id.trim().length() < 1) // dynamically pick a zone
                   zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length>0) and (.loadgenerators|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
-                if(zone_id == null)
+                if(isNullOrEmpty(zone_id))
                   error "No zones with available infrastructure were found! Please run 'Start Infra' job."
 
                 sh "neoload test-settings --zone ${zone_id} --lgs ${env.lg_count} --scenario ${env.full_scenario_name} createorpatch '${env.test_settings_name}'"
@@ -129,7 +129,7 @@ sla_profiles:
           stage('Run a sanity scenario') {
             steps {
               script {
-                if(!env.sanity_scenario_name.isEmpty()) {
+                if(env.sanity_scenario_name.isEmpty()) {
                   sanityCode = 3 // default to something absurd
                   try {
                     wrap([$class: 'BuildUser']) {
@@ -214,4 +214,8 @@ sla_profiles:
       }
     }
   }
+}
+
+def isNullOrEmpty(val) {
+  return ("null".equals(val) || !val?.trim())
 }
