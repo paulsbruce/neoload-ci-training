@@ -13,7 +13,7 @@ def call(Map params) {
       sanity_scenario_name = params.get('sanity',null)
       load_scenario_name = params.get('scenario',null)
       test_settings_name = params.get('job','example-Jenkins')
-      project_yaml_file_and_comma = params.get('project_yaml',null)
+      project_yaml_file = params.get('project_yaml',null)
       lg_count = params.get('lgs',1)
       test_dir = params.get('test_dir','.')
     }
@@ -40,8 +40,8 @@ def call(Map params) {
             env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
             env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
             env.test_settings_name = "${env.agent_name}-${JOB_NAME}"
-            if(env.project_yaml_file_and_comma != null)
-              env.project_yaml_file_and_comma += ","
+            if(env.project_yaml_file != null && "${env.project_yaml_file}".trim().length() > 0)
+              env.project_yaml_file_and_comma = "${env.project_yaml_file},"
           }
         }
       }
