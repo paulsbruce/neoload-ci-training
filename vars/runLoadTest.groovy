@@ -22,6 +22,7 @@ def call(Map params) {
       stage ('Validate inputs') {
         agent any
         steps {
+          sh "printenv"
           script {
             if(env.load_scenario_name == null)
               error "No 'scenario' parameter specified!"
