@@ -6,5 +6,6 @@ runLoadTest(
   project_yaml: 'default_mocks.yaml',
   vus: 10,
   duration: 2,
-  lgs: 2
+  lgs: 2,
+  sanity: 'sanityScenario'
 )
