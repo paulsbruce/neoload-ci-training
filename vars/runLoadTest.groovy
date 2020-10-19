@@ -26,7 +26,7 @@ def call(Map params) {
           script {
             if(env.load_scenario_name == null)
               error "No 'scenario' parameter specified!"
-            if(env.lg_count > 2)
+            if(env.lg_count.toInteger() > 2)
               error "You cannot use more than 2 load generators without assistance."
           }
         }
