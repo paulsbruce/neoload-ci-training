@@ -41,13 +41,12 @@ def call(Map params) {
             env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
             env.test_settings_name = "${env.agent_name}-${JOB_NAME}"
             if(env.project_yaml_file != null && "${env.project_yaml_file}".trim().length() > 0) {
-              print "Adding comma"
               env.project_yaml_file_and_comma = "${env.project_yaml_file},"
-              print "${env.project_yaml_file_and_comma}"
             }
             env.actual_scenario_name = env.default_scenario_name
-            if(env.load_scenario_name != null)
+            if(env.load_scenario_name != null) {
               env.actual_scenario_name = env.load_scenario_name
+            }
           }
           sh "printenv"
         }
