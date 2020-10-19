@@ -17,6 +17,7 @@ def call(Map params) {
       lg_count = params.get('lgs',1)
       test_dir = params.get('test_dir','.')
       default_scenario_name = 'loadTest'
+      reporting_timespan = params.get('reporting_timespan','10%-90%')
     }
 
     stages {
@@ -195,6 +196,27 @@ sla_profiles:
                         env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
                         print "Final status code was ${env.exitCode}"
                       }
+                      script {
+                        sh """neoload report --filter='timespan=${env.reporting_timespan}' \
+                              --template builtin:transactions-csv \
+                              --out-file neoload-transactions.csv \
+                              cur
+                         """
+
+                        sh """neoload report --filter='timespan=${env.reporting_timespan}' \
+                              --template reporting/jinja/sample-custom-report.html.j2 \
+                              --out-file neoload-results.html \
+                              cur
+                         """
+
+                        sh """neoload report --filter='timespan=${env.reporting_timespan}' \
+                              --template reporting/jinja/sample-trends-report.html.j2 \
+                              --out-file neoload-trends.html \
+                              --type trends \
+                              cur
+                         """
+                      }
+                      archiveArtifacts artifacts: 'neoload-*.html'
                     }
                   }
                 } //end parallel
@@ -205,26 +227,6 @@ sla_profiles:
                 sh "neoload test-results junitsla"
                 junit testResults: 'junit-sla.xml', allowEmptyResults: true
                 archiveArtifacts artifacts: 'd.*.yaml'
-
-                sh """neoload report --filter='timespan=10%-90%' \
-                      --template builtin:transactions-csv \
-                      --out-file neoload-transactions.csv \
-                      cur
-                 """
-
-                sh """neoload report --filter='timespan=10%-90%' \
-                      --template reporting/jinja/sample-custom-report.html.j2 \
-                      --out-file neoload-results.html \
-                      cur
-                 """
-
-                sh """neoload report --filter='timespan=10%-90%' \
-                      --template reporting/jinja/sample-trends-report.html.j2 \
-                      --out-file neoload-trends.html \
-                      --type trends \
-                      cur
-                 """
-                 archiveArtifacts artifacts: 'neoload-*.html'
               }
             }
           }
