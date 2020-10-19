@@ -24,7 +24,7 @@ def call(Map params) {
         agent any
         steps {
           script {
-            if(env.load_scenario_name == null)
+            if(env.load_scenario_name.isEmpty())
               error "No 'scenario' parameter specified!"
             if(env.lg_count.toInteger() > 2)
               error "You cannot use more than 2 load generators without assistance."
@@ -44,7 +44,7 @@ def call(Map params) {
               env.project_yaml_file_and_comma = "${env.project_yaml_file},"
             }
             env.actual_scenario_name = env.default_scenario_name
-            if(env.load_scenario_name != null) {
+            if(!env.load_scenario_name.isEmpty()) {
               env.actual_scenario_name = env.load_scenario_name
             }
           }
@@ -129,7 +129,7 @@ sla_profiles:
           stage('Run a sanity scenario') {
             steps {
               script {
-                if(env.sanity_scenario_name != null) {
+                if(!env.sanity_scenario_name.isEmpty()) {
                   sanityCode = 3 // default to something absurd
                   try {
                     wrap([$class: 'BuildUser']) {
