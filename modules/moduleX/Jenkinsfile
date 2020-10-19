@@ -4,7 +4,6 @@ runLoadTest(
   job: 'specific-job-name-optional',
   test_dir: 'tests/neoload_projects/example_1',
   project_yaml: 'default_mocks.yaml',
-  sanity: 'sanityScenario',
   vus: 10,
   duration: 2,
   lgs: 2
