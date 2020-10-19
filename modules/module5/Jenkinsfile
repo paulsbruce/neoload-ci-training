@@ -103,6 +103,13 @@ scenarios:
             }
             script {
               sanityCode = 3 // default to something absurd
+              sh """neoload run \
+                    --scenario sanityScenario \
+                    --name \"${JOB_NAME}-${BUILD_NUMBER}\" \
+                    --description \"Started by Jenkins user ${BUILD_USER}\" \
+                    --as-code default.yaml,d.sanity.yaml \
+                    cur
+                    """
               try {
                 sanityCode = sh(script: """neoload run \
                       --scenario sanityScenario \
