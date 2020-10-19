@@ -97,16 +97,22 @@ def call(Map params) {
           stage('Prepare Test Assets') {
             steps {
               writeFile(file: "d.overrides.yaml", text:"""
-  scenarios:
-  - name: loadTest
-    populations:
-    - name: popGetsMock
-      rampup_load:
-        min_users: 1
-        max_users: ${env.full_test_max_vus}
-        increment_users: 1
-        increment_every: 5s
-        duration: ${env.full_test_duration_mins}m
+scenarios:
+- name: loadTest
+  populations:
+  - name: popGetsMock
+    rampup_load:
+      min_users: 1
+      max_users: ${env.full_test_max_vus}
+      increment_users: 1
+      increment_every: 5s
+      duration: ${env.full_test_duration_mins}m
+sla_profiles:
+- name: geo_3rdparty_sla
+  description: GUARDRAIL Avg Resp Time >=1s >= 3s for cached queries
+  thresholds:
+  - avg-resp-time warn >= 1s fail >= 3s per interval
+  - error-rate warn >= 10% per test
               """)
               stash includes: 'd.*.yaml', name: 'dynamics'
             }
