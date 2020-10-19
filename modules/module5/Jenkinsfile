@@ -42,6 +42,7 @@ pipeline {
         stage('Prepare agent') {
           steps {
             sh 'neoload --version'
+            sh 'printenv'
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
             }
@@ -78,10 +79,10 @@ scenarios:
   - name: popGets
     rampup_load:
       min_users: 1
-      max_users: ${full_test_max_vus}
+      max_users: ${env.full_test_max_vus}
       increment_users: 2
       increment_every: 5s
-      duration: ${full_test_duration_mins}m
+      duration: ${env.full_test_duration_mins}m
             """)
             stash includes: 'd.*.yaml', name: 'dynamics'
           }
