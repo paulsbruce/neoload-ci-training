@@ -205,6 +205,26 @@ sla_profiles:
                 sh "neoload test-results junitsla"
                 junit testResults: 'junit-sla.xml', allowEmptyResults: true
                 archiveArtifacts artifacts: 'd.*.yaml'
+
+                sh """neoload report --filter='timespan=10%-90%' \
+                      --template builtin:transactions-csv \
+                      --out-file neoload-transactions.csv \
+                      cur
+                 """
+
+                sh """neoload report --filter='timespan=10%-90%' \
+                      --template reporting/jinja/sample-custom-report.html.j2 \
+                      --out-file neoload-results.html \
+                      cur
+                 """
+
+                sh """neoload report --filter='timespan=10%-90%' \
+                      --template reporting/jinja/sample-trends-report.html.j2 \
+                      --out-file neoload-trends.html \
+                      --type trends \
+                      cur
+                 """
+                 archiveArtifacts artifacts: 'neoload-*.html'
               }
             }
           }
