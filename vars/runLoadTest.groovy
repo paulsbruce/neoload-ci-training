@@ -16,6 +16,7 @@ def call(Map params) {
       project_yaml_file = params.get('project_yaml',null)
       lg_count = params.get('lgs',1)
       test_dir = params.get('test_dir','.')
+      default_scenario_name = 'loadTest'
     }
 
     stages {
@@ -44,6 +45,9 @@ def call(Map params) {
               env.project_yaml_file_and_comma = "${env.project_yaml_file},"
               print "${env.project_yaml_file_and_comma}"
             }
+            env.actual_scenario_name = env.default_scenario_name
+            if(env.load_scenario_name != null)
+              env.actual_scenario_name = env.load_scenario_name
           }
           sh "printenv"
         }
@@ -152,7 +156,7 @@ def call(Map params) {
                 steps {
                   wrap([$class: 'BuildUser']) {
                     sh """neoload run \
-                      --scenario \"${env.load_scenario_name}\" \
+                      --scenario \"${env.actual_scenario_name}\" \
                       --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
                       --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
                       --detached \
