@@ -24,8 +24,6 @@ def call(Map params) {
         agent any
         steps {
           script {
-            if(isNullOrEmpty(env.load_scenario_name))
-              error "No 'scenario' parameter specified!"
             if(env.lg_count.toInteger() > 2)
               error "You cannot use more than 2 load generators without assistance."
           }
