@@ -59,6 +59,8 @@ pipeline {
             }
 
             sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
+
+            sh "neoload test-settings delete cur"
           }
         }
       }
