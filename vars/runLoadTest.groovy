@@ -200,7 +200,7 @@ sla_profiles:
                           error "Waiting error: ${err}"
                         }
                       }
-                      sh "mkdir reports"
+                      sh "mkdir -p reports"
                       script {
                         sh """neoload report --filter='timespan=${env.reporting_timespan}' \
                               --template builtin:transactions-csv \
@@ -240,7 +240,6 @@ sla_profiles:
                            reportName: "NeoLoad Trends (Custom)"
                          ])
                       }
-                      archiveArtifacts artifacts: 'reports/*.*'
                     }
                   }
                 } //end parallel
@@ -251,6 +250,7 @@ sla_profiles:
                 sh "neoload test-results junitsla"
                 junit testResults: 'junit-sla.xml', allowEmptyResults: true
                 archiveArtifacts artifacts: 'd.*.yaml'
+                archiveArtifacts artifacts: 'reports/*.*'
               }
             }
           }
