@@ -178,6 +178,8 @@ sla_profiles:
                         logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
                         echo "Logs url: ${logs_url}"
 
+                        createSummary icon:'graph.png', text: "<a href='$logs_url'>View in NeoLoad Web</a>"
+
                         sh "neoload fastfail --max-failure 25 slas cur"
                       }
                     }
