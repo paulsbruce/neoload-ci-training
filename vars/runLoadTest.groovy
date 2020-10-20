@@ -128,7 +128,7 @@ sla_profiles:
           stage('Run a sanity scenario') {
             steps {
               script {
-                if(env.sanity_scenario_name.isEmpty()) {
+                if(!env.sanity_scenario_name.isEmpty()) {
                   sanityCode = 3 // default to something absurd
                   try {
                     wrap([$class: 'BuildUser']) {
