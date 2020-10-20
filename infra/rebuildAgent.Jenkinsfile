@@ -22,7 +22,7 @@ pipeline {
           imgCount = sh(script: "docker images -a --filter='label=${env.docker_label}' --format='{{.ID}}' | wc -l", returnStdout: true).toInteger()
           if(imgCount > 0)
             sh "docker rmi ${env.docker_label}"
-          docker.build("${env.docker_label}:latest", "--no-cache --rm --label '${env.docker_label}' -f ./infra/JenkinsBuildAgent-docker.Dockerfile .")
+          docker.build("${env.docker_label}:latest", "--no-cache --rm --label '${env.docker_label}' -f ./infra/JenkinsBuildAgent.Dockerfile .")
         }
       }
     }
