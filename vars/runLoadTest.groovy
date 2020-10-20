@@ -193,30 +193,54 @@ sla_profiles:
                   stage('Wait for test finale') {
                     steps {
                       script {
-                        env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
-                        print "Final status code was ${env.exitCode}"
+                        try {
+                          env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
+                          print "Final status code was ${env.exitCode}"
+                        } catch(err) {
+                          error "Waiting error: ${err}"
+                        }
                       }
+                      sh "mkdir reports"
                       script {
                         sh """neoload report --filter='timespan=${env.reporting_timespan}' \
                               --template builtin:transactions-csv \
-                              --out-file neoload-transactions.csv \
+                              --out-file reports/neoload-transactions.csv \
+                              --max-rps 5 \
                               cur
                          """
 
                         sh """neoload report --filter='timespan=${env.reporting_timespan}' \
                               --template reporting/jinja/sample-custom-report.html.j2 \
-                              --out-file neoload-results.html \
+                              --out-file reports/neoload-results.html \
+                              --max-rps 5 \
                               cur
                          """
+                        publishHTML (target: [
+                           allowMissing: false,
+                           alwaysLinkToLastBuild: false,
+                           keepAll: true,
+                           reportDir: 'reports',
+                           reportFiles: 'neoload-results.html',
+                           reportName: "NeoLoad Test Results"
+                        ])
 
-                        sh """neoload report --filter='timespan=${env.reporting_timespan}' \
+                        sh """neoload report --filter='timespan=${env.reporting_timespan};results=-5' \
                               --template reporting/jinja/sample-trends-report.html.j2 \
-                              --out-file neoload-trends.html \
+                              --out-file reports/neoload-trends.html \
                               --type trends \
+                              --max-rps 5 \
                               cur
                          """
+                        publishHTML (target: [
+                           allowMissing: false,
+                           alwaysLinkToLastBuild: false,
+                           keepAll: true,
+                           reportDir: 'reports',
+                           reportFiles: 'neoload-trends.html',
+                           reportName: "NeoLoad Trends (Custom)"
+                         ])
                       }
-                      archiveArtifacts artifacts: 'neoload-*.html'
+                      archiveArtifacts artifacts: 'reports/*.*'
                     }
                   }
                 } //end parallel
