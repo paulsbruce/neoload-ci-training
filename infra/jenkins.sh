@@ -1,5 +1,6 @@
-docker ps -q --filter "name=jenkins-docker" | grep -q . && docker stop jenkins-docker
-docker ps -q --filter "name=jenkins-blueocean" | grep -q . && docker stop jenkins-blueocean
+docker ps -q --filter "name=jenkins-docker" | grep -q . && docker stop jenkins-docker && docker rm jenkins-docker
+docker ps -q --filter "name=jenkins-blueocean" | grep -q . && docker stop jenkins-blueocean && docker rm jenkins-blueocean
+sleep 5
 
 NLW_HOST=nlweb.shared
 NLW_HOST_IP=$(host $NLW_HOST | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
@@ -29,6 +30,7 @@ docker container run \
   --env DOCKER_HOST=tcp://docker:2376 \
   --env DOCKER_CERT_PATH=/certs/client \
   --env DOCKER_TLS_VERIFY=1 \
+  --env JAVA_OPTS="-Dhudson.model.DirectoryBrowserSupport.CSP=\"sandbox allow-scripts\; default-src 'self'\; style-src 'self' 'unsafe-inline'\;\"" \
   --publish 8080:8080 \
   --publish 50000:50000 \
   --volume jenkins-data:/var/jenkins_home \

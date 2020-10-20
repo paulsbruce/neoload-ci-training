@@ -47,7 +47,6 @@ def call(Map params) {
               env.actual_scenario_name = env.load_scenario_name
             }
           }
-          sh "printenv"
         }
       }
       stage ('Check/Build Docker Agent') {
