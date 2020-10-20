@@ -16,6 +16,7 @@ pipeline {
         script {
           sh "uname -a"
           env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true).trim()
+          env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
         }
       }
     }
@@ -54,7 +55,7 @@ pipeline {
               if(zone_id.trim().length() < 1) // dynamically pick a zone
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
-              sh "neoload test-settings --zone ${zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness'"
+              sh "neoload test-settings --zone ${zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness-${env.agent_name}'"
             }
 
             sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
