@@ -124,8 +124,7 @@ else
 fi
 #System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")
 
-docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools
-
+docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools &>/dev/null
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
 source "`dirname $0`"/start_after.sh
