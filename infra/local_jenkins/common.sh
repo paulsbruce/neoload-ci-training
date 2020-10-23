@@ -16,7 +16,28 @@ if [ -z "$(which docker)" ]; then
   exit 1
 fi
 
-NLW_TOKEN=$(cat "`dirname $0`"/nlw_token| tr -d '\r' | tr -d '\n' | tr -d ' ')
+token_file="`dirname $0`"/nlw_token
+if [ ! -f "$token_file" ]; then
+  token_file=~/nlw_token
+fi
+if [ -f "$token_file" ]; then
+  NLW_TOKEN=$(cat $token_file | tr -d '\r' | tr -d '\n' | tr -d ' ')
+fi
+
+mask() {
+        local n=$2                   # number of chars to leave
+        local a="${1:0:${#1}-n}"     # take all but the last n chars
+        local b="${1:${#1}-n}"       # take the final n chars
+        printf "%s%s\n" "${a//?/*}" "$b"   # substitute a with asterisks
+}
+
+if [ -z "$NLW_TOKEN" ]; then
+  echo "No NLW_TOKEN found! Please either set this variable first, or provide a file ~/nlw_token"
+  exit 1
+else
+  masked=$(mask "$NLW_TOKEN" 5)
+  echo "NLW_TOKEN: $masked"
+fi
 
 JENKINS_HTTP_PORT=80
 
