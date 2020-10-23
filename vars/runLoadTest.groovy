@@ -104,7 +104,7 @@ scenarios:
       increment_users: 1
       increment_every: 5s
       duration: ${env.full_test_duration_mins}m
-sla_profiles
+sla_profiles:
 - name: geo_3rdparty_sla
   description: SLAs for cached queries, error rates
   thresholds:
