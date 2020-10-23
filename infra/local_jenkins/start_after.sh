@@ -85,6 +85,9 @@ cli_prep="
 set -e
 
 export JENKINS_URL=$INT_JENKINS_URL JENKINS_USER_ID=$JENKINS_USER_ID JENKINS_API_TOKEN=$JENKINS_SECRET
+echo JENKINS_URL: $JENKINS_URL
+echo JENKINS_USER_ID: $JENKINS_USER_ID
+echo INT_JENKINS_URL: $INT_JENKINS_URL
 
 curl -s -L $INT_JENKINS_URL/jnlpJars/jenkins-cli.jar -o /var/jenkins_home/jenkins-cli.jar
 function jcli() {
