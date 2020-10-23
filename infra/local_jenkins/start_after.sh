@@ -79,7 +79,7 @@ shared_libs_xml_fp=$(mkf_copy "$shared_libs_xml" 'org.jenkinsci.plugins.workflow
 
 docker cp "`dirname $0`"/hosts.add.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/hosts.add.sh
 chmod_x "$INSIDE_JENKINS_HOME/hosts.add.sh"
-docker exec -it --user root jenkins-blueocean sh $INSIDE_JENKINS_HOME/hosts.add.sh
+docker exec -it --user root jenkins-blueocean $INSIDE_JENKINS_HOME/hosts.add.sh
 
 cli_prep="
 set -e
