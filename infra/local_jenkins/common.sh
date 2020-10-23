@@ -15,6 +15,10 @@ if [ -z "$(which docker)" ]; then
   echo "Docker tools are not installed!!!"
   exit 1
 fi
+if [ -z "$(which curl)" ]; then
+  echo "Curl is not installed!!!"
+  exit 1
+fi
 
 token_file="`dirname $0`"/nlw_token
 if [ ! -f "$token_file" ]; then

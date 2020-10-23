@@ -77,17 +77,9 @@ shared_libs_xml="<?xml version='1.1' encoding='UTF-8'?>
 </org.jenkinsci.plugins.workflow.libs.GlobalLibraries>"
 shared_libs_xml_fp=$(mkf_copy "$shared_libs_xml" 'org.jenkinsci.plugins.workflow.libs.GlobalLibraries.xml')
 
-hosts_add="
-set -e
-
-echo 'Adding gitbucket to hosts'
-GITBUCKET_IP=\$(ping -c 1 -t 1 host.docker.internal | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
-echo \"\$GITBUCKET_IP\\tgitbucket\\n\" > /etc/hosts
-cat /etc/hosts
-"
-hosts_add_fp=$(mkf_copy "$hosts_add" 'hosts.add.sh')
-chmod_x $hosts_add_fp
-docker exec -it --user root jenkins-blueocean sh $hosts_add_fp
+docker cp "`dirname $0`"/hosts.add.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/hosts.add.sh
+chmod_x "$INSIDE_JENKINS_HOME/hosts.add.sh"
+docker exec -it --user root jenkins-blueocean sh $INSIDE_JENKINS_HOME/hosts.add.sh
 
 cli_prep="
 set -e
