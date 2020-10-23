@@ -108,8 +108,7 @@ sla_profiles:
 - name: geo_3rdparty_sla
   description: SLAs for cached queries, error rates
   thresholds:
-  - error-rate warn >= 10% per interval
-  - error-rate fail >= 30% per interval
+  - error-rate warn >= 10% fail >= 30% per interval
   - avg-resp-time warn >= 1000ms fail >= 25000ms per interval
   - error-rate fail >= 20% per test
               """)
