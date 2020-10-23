@@ -28,13 +28,6 @@ if [ -z "$NLW_HOST_IP" ]; then
   exit 2
 fi
 
-# INT_HOST_IP=$(ifconfig | grep -A 3 -E 'en0|eth0' | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' | head -n1)
-#
-# if [ -z "$INT_HOST_IP" ]; then
-#   echo "Could not identify (internal) IP address of this machine (en0|eth0)"
-#   exit 2
-# fi
-
 EXT_JENKINS_URL=http://localhost:$JENKINS_HTTP_PORT
 INT_JENKINS_URL=http://localhost:8080 # this is always the case from inside blueocean container
 STATIC_JENKINS_URL=http://127.0.0.1
@@ -66,7 +59,6 @@ USE_DIND=true
 # fi
 
 echo "$NLW_HOST => $NLW_HOST_IP"
-#echo "This host => $INT_HOST_IP"
 echo "DOCKER_TCP_URI => $DOCKER_TCP_URI"
 
 if [ "$1" == "debug" ]; then
