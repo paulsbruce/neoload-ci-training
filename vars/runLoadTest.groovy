@@ -104,12 +104,14 @@ scenarios:
       increment_users: 1
       increment_every: 5s
       duration: ${env.full_test_duration_mins}m
-sla_profiles:
+sla_profiles
 - name: geo_3rdparty_sla
-  description: GUARDRAIL Avg Resp Time >=1s >= 3s for cached queries
+  description: SLAs for cached queries, error rates
   thresholds:
-  - avg-resp-time warn >= 1s fail >= 3s per interval
-  - error-rate warn >= 10% per test
+  - error-rate warn >= 10% per interval
+  - error-rate fail >= 30% per interval
+  - avg-resp-time warn >= 1000ms fail >= 25000ms per interval
+  - error-rate fail >= 20% per test
               """)
               stash includes: 'd.*.yaml', name: 'dynamics'
             }

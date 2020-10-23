@@ -30,10 +30,8 @@ sla_profiles: # defaults for dev/qa systems; can be overridden by additional sla
 - name: geo_3rdparty_sla
   description: Avg Resp Time >=1000ms >= 25000ms for cached queries
   thresholds:
-  - error-rate warn >= 10% per interval
-  - error-rate fail >= 30% per interval
   - avg-resp-time warn >= 25000ms per interval
-  - error-rate fail >= 20% per test
+  - error-rate warn >= 10% per test
 
 populations:
 - name: popGetsMock
