@@ -5,7 +5,7 @@ set +x
 source "`dirname $0`"/common.sh
 
 echo "NeoLoad Web Host IP: $NLW_HOST_IP"
-echo "This host IP: $INT_HOST_IP"
+#echo "This host IP: $INT_HOST_IP"
 
 docker ps -a -q --filter "label=jenkins" | grep -q . && \
   docker stop $(docker ps -a -q --filter "label=jenkins" --format '{{.ID}}') > /dev/null 2>&1
@@ -93,7 +93,6 @@ if [ "$USE_DIND" == "true" ]; then
     --volume jenkins-data:/var/jenkins_home \
     --volume jenkins-docker-certs:/certs/client:ro \
     --add-host nlweb.shared:$NLW_HOST_IP \
-    --add-host gitbucket:$INT_HOST_IP \
     jenkinsci/blueocean
 else
   echo "Using Docker at Host"
@@ -122,12 +121,12 @@ else
     --volume jenkins-data:/var/jenkins_home \
     --volume jenkins-docker-certs:/certs/client:ro \
     --add-host nlweb.shared:$NLW_HOST_IP \
-    --add-host gitbucket:$INT_HOST_IP \
     jenkinsci/blueocean
 fi
 #System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")
 
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools
+
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
 source "`dirname $0`"/start_after.sh
@@ -145,3 +144,7 @@ fi
 if [ -t 0 ]; then
   open $EXT_JENKINS_URL
 fi
+
+docker exec -it --user root jenkins-docker docker pull neotys/neoload-controller:latest
+docker exec -it --user root jenkins-docker docker pull neotys/neoload-loadgenerator:latest
+#wait
