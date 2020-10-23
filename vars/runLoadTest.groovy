@@ -70,7 +70,6 @@ def call(Map params) {
           stage('Prepare agent') {
             steps {
               sh 'neoload --version'
-              sh 'printenv'
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
                 sh "neoload login --url ${env.api_url} $NLW_TOKEN"
               }
