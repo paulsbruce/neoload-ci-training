@@ -1,11 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 set +x
 
-source "`dirname $0`"/common.sh
+. "`dirname $0`"/common.sh
 
 echo "NeoLoad Web Host IP: $NLW_HOST_IP"
-#echo "This host IP: $INT_HOST_IP"
 
 docker ps -a -q --filter "label=jenkins" | grep -q . && \
   docker stop $(docker ps -a -q --filter "label=jenkins" --format '{{.ID}}') > /dev/null 2>&1
@@ -137,14 +136,13 @@ if [[ "$CURL_CONTENTS" == *"initialAdminPassword"* ]];then
   echo "Please use your Jenkins initial admin password: $JENKINS_SECRET"
 else
   echo "Jenkins is already initialized and ready to use."
-  echo "Press any key to close this window."
-  read -t 15 -n 1
 fi
 
 if [ -t 0 ]; then
   open $EXT_JENKINS_URL
 fi
 
+echo "Pre-loading the latest load generator and controller Docker images"
 docker exec -it --user root jenkins-docker docker pull neotys/neoload-controller:latest
 docker exec -it --user root jenkins-docker docker pull neotys/neoload-loadgenerator:latest
 #wait
