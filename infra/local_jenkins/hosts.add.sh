@@ -3,6 +3,7 @@ set -e
 
 if [ ! $(ping -c1 host.docker.internal &>/dev/null) ]; then
   echo -e "`/sbin/ip route|awk '/default/ { print $3 }'`\thost.docker.internal" | tee -a /etc/hosts
+  sleep 3
 fi
 
 if [ ! $(ping -c1 host.docker.internal &>/dev/null) ]; then
