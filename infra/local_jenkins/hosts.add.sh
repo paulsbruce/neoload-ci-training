@@ -1,10 +1,8 @@
 #!/bin/bash
 set -e
 
-echo "First ping"
-ping -c1 host.docker.internal
-
 if [ ! $(ping -c1 host.docker.internal &>/dev/null) ]; then
+  echo "Writing explicit host.docker.internal to /etc/hosts"
   echo -e "`/sbin/ip route|awk '/default/ { print $3 }'`\thost.docker.internal" | tee -a /etc/hosts
   sleep 3
 fi
