@@ -7,9 +7,6 @@ if ! ping -c1 host.docker.internal &>/dev/null ; then
   sleep 3
 fi
 
-echo "Second ping"
-ping -c1 host.docker.internal
-
 if ! ping -c1 host.docker.internal ; then
   echo "Could not resolve host.docker.internal from inside the Docker host"
   exit 1

@@ -10,7 +10,7 @@ docker ps -a -q --filter "label=jenkins" | grep -q . && \
   docker stop $(docker ps -a -q --filter "label=jenkins" --format '{{.ID}}') > /dev/null 2>&1
 docker ps -a -q --filter "label=jenkins" | grep -q . && \
   docker rm $(docker ps -a -q --filter "label=jenkins" --format '{{.ID}}') > /dev/null 2>&1
-sleep 5
+wait
 
 if [ "${RESET}" != "" ]; then
   read -p "Are you sure you want to reset your local jenkins examples? <y/N> " prompt

@@ -5,7 +5,7 @@ source "`dirname $0`"/common.sh
 
 echo "Waiting a bit for Jenkins to start up..."
 NUM_OF_TRIES=0
-MAX_TRIES=5
+MAX_TRIES=24 # x5 = 2m
 LOGIN_URL=$EXT_JENKINS_URL/login?from=%2F
 while [ $NUM_OF_TRIES -le $MAX_TRIES ]; do
   echo "Waiting for Jenkins to start up..."
