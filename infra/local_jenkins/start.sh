@@ -57,72 +57,42 @@ if [ -z "$(docker volume ls -q --filter 'name=dind-containers')" ]; then
   docker volume create --label "dind=yes" dind-containers
 fi
 
-if [ "$USE_DIND" == "true" ]; then
-  echo "Using Docker-in-Docker"
-  docker container run \
-    --name jenkins-docker \
-    --label 'jenkins' \
-    --rm \
-    --detach \
-    --privileged \
-    --network jenkins \
-    --network-alias docker \
-    --env DOCKER_TLS_CERTDIR=/certs \
-    --volume jenkins-docker-certs:/certs/client \
-    --volume jenkins-data:/var/jenkins_home \
-    --volume dind-volumes:/var/lib/docker/volumes \
-    --volume dind-overlay2:/var/lib/docker/overlay2 \
-    --volume dind-image:/var/lib/docker/image \
-    --volume dind-containers:/var/lib/docker/containers \
-    --publish 2376:2376 \
-    docker:dind
+echo "Using Docker-in-Docker"
+docker container run \
+  --name jenkins-docker \
+  --label 'jenkins' \
+  --rm \
+  --detach \
+  --privileged \
+  --network jenkins \
+  --network-alias docker \
+  --env DOCKER_TLS_CERTDIR=/certs \
+  --volume jenkins-docker-certs:/certs/client \
+  --volume jenkins-data:/var/jenkins_home \
+  --volume dind-volumes:/var/lib/docker/volumes \
+  --volume dind-overlay2:/var/lib/docker/overlay2 \
+  --volume dind-image:/var/lib/docker/image \
+  --volume dind-containers:/var/lib/docker/containers \
+  --publish 2376:2376 \
+  docker:dind
 
-  docker container run \
-    --name jenkins-blueocean \
-    --label 'jenkins' \
-    --rm \
-    --detach \
-    --network jenkins \
-    --env DOCKER_HOST=$DOCKER_TCP_URI \
-    --env DOCKER_CERT_PATH=/certs/client \
-    --env DOCKER_TLS_VERIFY=1 \
-    --env JAVA_OPTS="-Djava.awt.headless=true -Dhudson.model.DirectoryBrowserSupport.CSP=\"default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' 'unsafe-inline' data:;\"" \
-    --publish $JENKINS_HTTP_PORT:8080 \
-    --publish 50000:50000 \
-    --volume jenkins-data:/var/jenkins_home \
-    --volume jenkins-docker-certs:/certs/client:ro \
-    --add-host nlweb.shared:$NLW_HOST_IP \
-    jenkinsci/blueocean
-else
-  echo "Using Docker at Host"
-  docker container run \
-    --name jenkins-docker \
-    --label 'jenkins' \
-    --rm \
-    --detach \
-    --network jenkins \
-    -p 23750:2375 \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    alpine/socat tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
-
-  docker container run \
-    --name jenkins-blueocean \
-    --label 'jenkins' \
-    --rm \
-    --detach \
-    --network jenkins \
-    --env DOCKER_HOST=tcp://jenkins-docker:23750 \
-    --env DOCKER_CERT_PATH=/certs/client \
-    --env DOCKER_TLS_VERIFY=1 \
-    --env JAVA_OPTS="-Djava.awt.headless=true -Dhudson.model.DirectoryBrowserSupport.CSP=\"default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' 'unsafe-inline' data:;\"" \
-    --publish $JENKINS_HTTP_PORT:8080 \
-    --publish 50000:50000 \
-    --volume jenkins-data:/var/jenkins_home \
-    --volume jenkins-docker-certs:/certs/client:ro \
-    --add-host nlweb.shared:$NLW_HOST_IP \
-    jenkinsci/blueocean
-fi
-#System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "")
+docker container run \
+  --name jenkins-blueocean \
+  --label 'jenkins' \
+  --rm \
+  --detach \
+  --network jenkins \
+  --env DOCKER_HOST=$DOCKER_TCP_URI \
+  --env DOCKER_CERT_PATH=/certs/client \
+  --env DOCKER_TLS_VERIFY=1 \
+  --env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true" \
+  --publish $JENKINS_HTTP_PORT:8080 \
+  --publish 50000:50000 \
+  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-docker-certs:/certs/client:ro \
+  --add-host nlweb.shared:$NLW_HOST_IP \
+  jenkinsci/blueocean
+# -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
 
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
 
