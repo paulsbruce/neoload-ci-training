@@ -138,7 +138,11 @@ else
 fi
 
 if [ -t 0 ]; then
-  open $EXT_JENKINS_URL
+  if [ -z "$(which open)" ]; then
+    open $EXT_JENKINS_URL
+  elif [ -z "$(which xdg-open)" ]; then
+    xdg-open $EXT_JENKINS_URL
+  fi
 fi
 
 echo "Pre-loading the latest load generator and controller Docker images"
