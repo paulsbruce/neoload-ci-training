@@ -77,9 +77,9 @@ shared_libs_xml="<?xml version='1.1' encoding='UTF-8'?>
 </org.jenkinsci.plugins.workflow.libs.GlobalLibraries>"
 shared_libs_xml_fp=$(mkf_copy "$shared_libs_xml" 'org.jenkinsci.plugins.workflow.libs.GlobalLibraries.xml')
 
-# docker cp "`dirname $0`"/hosts.add.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/hosts.add.sh
-# chmod_x "$INSIDE_JENKINS_HOME/hosts.add.sh"
-# docker exec -it --user root jenkins-blueocean $INSIDE_JENKINS_HOME/hosts.add.sh
+docker cp "`dirname $0`"/hosts.add.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/hosts.add.sh
+chmod_x "$INSIDE_JENKINS_HOME/hosts.add.sh"
+docker exec -it --user root jenkins-blueocean $INSIDE_JENKINS_HOME/hosts.add.sh
 
 cli_prep="
 set -e
@@ -114,32 +114,20 @@ function cp_pipeline_job() {
 cli_prep_fp=$(mkf_copy "$cli_prep" 'jenkins.cli.prep.sh')
 chmod_x $cli_prep_fp
 
+docker cp "`dirname $0`"/jenkins.cli.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.steps.sh
+chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.steps.sh"
+
 contents_config="
 #!/bin/sh
 
 source $cli_prep_fp
-
-jcli install-plugin ws-cleanup basic-branch-build-strategies build-user-vars-plugin pipeline-stage-view test-results-analyzer groovy-postbuild
-# list-credentials system::system::jenkins
 
 set +e
 echo 'Applying NLW secret to credential store'
 cat $credential_xml_fp | jcli create-credentials-by-xml system::system::jenkins \"(global)\"
 set -e
 
-echo \$(cp_pipeline_job 'Start Infra' 'start_infra.xml' 'infra/start_infra.Jenkinsfile')
-echo \$(cp_pipeline_job 'Stop Infra' 'stop_infra.xml' 'infra/stop_infra.Jenkinsfile')
-echo \$(cp_pipeline_job 'Rebuild CLI Agent' 'rebuild_agent.xml' 'infra/rebuildAgent.Jenkinsfile')
-
-echo \$(cp_pipeline_job 'module1' 'module_1.xml' 'modules/module1/Jenkinsfile')
-echo \$(cp_pipeline_job 'moduleX' 'module_X.xml' 'modules/moduleX/Jenkinsfile')
-
-sleep 10
-jcli build 'Rebuild CLI Agent' -s
-
-#echo 'Restarting Jenkins after applying initial configurations'
-#jcli safe-restart
-sleep 5
+source $INSIDE_JENKINS_HOME/jenkins.cli.steps.sh
 "
 contents_config_fp=$(mkf_copy "$contents_config" 'jenkins.config.sh')
 chmod_x $contents_config_fp
