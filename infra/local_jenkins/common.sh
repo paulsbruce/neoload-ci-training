@@ -55,7 +55,7 @@ fi
 
 EXT_JENKINS_URL=http://localhost:$JENKINS_HTTP_PORT
 INT_JENKINS_URL=http://localhost:8080 # this is always the case from inside blueocean container
-STATIC_JENKINS_URL=http://127.0.0.1
+STATIC_JENKINS_URL=http://127.0.0.1/
 DOCKER_TCP_URI=tcp://docker:2376
 
 echo "$NLW_HOST => $NLW_HOST_IP"
