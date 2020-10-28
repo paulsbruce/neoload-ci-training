@@ -82,7 +82,7 @@ def call(Map params) {
                 if(zone_id.trim().toLowerCase().equals("null")) zone_id = ""
 
                 if(zone_id.trim().length() < 1) // dynamically pick a zone
-                  zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length>0) and (.loadgenerators|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
+                  zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|select(.[].status==\"AVAILABLE\")|length>0) and (.loadgenerators|select(.[].status==\"AVAILABLE\")|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
                 if(isNullOrEmpty(zone_id))
                   error "No zones with available infrastructure were found! Please run 'Start Infra' job."
