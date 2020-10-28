@@ -58,7 +58,7 @@ if [ -z "$(docker volume ls -q --filter 'name=dind-containers')" ]; then
 fi
 
 echo "Using Docker-in-Docker"
-docker pull docker:dind:latest
+docker pull docker:dind
 docker container run \
   --name jenkins-docker \
   --label 'jenkins' \
@@ -75,7 +75,7 @@ docker container run \
   --volume dind-image:/var/lib/docker/image \
   --volume dind-containers:/var/lib/docker/containers \
   --publish 2376:2376 \
-  docker:dind:latest
+  docker:dind
 
 docker pull jenkinsci/blueocean:latest
 docker container run \
