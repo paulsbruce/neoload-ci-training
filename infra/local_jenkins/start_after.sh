@@ -114,8 +114,6 @@ function cp_pipeline_job() {
 cli_prep_fp=$(mkf_copy "$cli_prep" 'jenkins.cli.prep.sh')
 chmod_x $cli_prep_fp
 
-echo "$cli_prep"
-
 docker cp "`dirname $0`"/jenkins.cli.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.steps.sh
 chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.steps.sh"
 
