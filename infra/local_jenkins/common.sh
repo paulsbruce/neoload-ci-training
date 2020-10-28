@@ -54,7 +54,7 @@ if [ -z "$NLW_HOST_IP" ]; then
   exit 2
 fi
 
-NLW_INFO=$(curl -s -L GET "$NLW_HOST_API_BASE/v2/resources/zones" -H "accept: application/json" -H "accountToken: $NLW_TOKEN")
+NLW_INFO=$(curl -s -S -L GET "$NLW_HOST_API_BASE/v2/resources/zones" -H "accept: application/json" -H "accountToken: $NLW_TOKEN" > /dev/null)
 echo $NLW_INFO
 if [[ "$NLW_INFO" == *"defaultzone"* ]];then
   echo "NLW_TOKEN WORKED!"
