@@ -9,7 +9,7 @@ if [ -z "$JENKINS_SECRET" ]; then
   exit 1
 fi
 
-if [ "$JENKINS_SECRET" == *\:* ]; then
+if [ "$JENKINS_SECRET" == *:* ]; then
   echo "Jenkins secret token was not valid!!! '$JENKINS_SECRET'"
   exit 2
 fi
