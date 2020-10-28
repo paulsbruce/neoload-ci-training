@@ -17,4 +17,4 @@ else
   cd $HOME/startup/neoload-ci-training && git pull
 fi
 
-$HOME/startup/neoload-ci-training/infra/local_jenkins/start.sh
+sudo $HOME/startup/neoload-ci-training/infra/local_jenkins/start.sh

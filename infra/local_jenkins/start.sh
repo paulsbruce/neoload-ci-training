@@ -58,6 +58,7 @@ if [ -z "$(docker volume ls -q --filter 'name=dind-containers')" ]; then
 fi
 
 echo "Using Docker-in-Docker"
+docker pull docker:dind:latest
 docker container run \
   --name jenkins-docker \
   --label 'jenkins' \
@@ -74,8 +75,9 @@ docker container run \
   --volume dind-image:/var/lib/docker/image \
   --volume dind-containers:/var/lib/docker/containers \
   --publish 2376:2376 \
-  docker:dind
+  docker:dind:latest
 
+docker pull jenkinsci/blueocean:latest
 docker container run \
   --name jenkins-blueocean \
   --label 'jenkins' \
@@ -85,14 +87,14 @@ docker container run \
   --env DOCKER_HOST=$DOCKER_TCP_URI \
   --env DOCKER_CERT_PATH=/certs/client \
   --env DOCKER_TLS_VERIFY=1 \
-  --env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true" \
   --publish $JENKINS_HTTP_PORT:8080 \
   --publish 50000:50000 \
   --volume jenkins-data:/var/jenkins_home \
   --volume jenkins-docker-certs:/certs/client:ro \
   --add-host nlweb.shared:$NLW_HOST_IP \
-  jenkinsci/blueocean
+  jenkinsci/blueocean:latest
 # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
+#--env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true" \
 
 sleep 10s
 
