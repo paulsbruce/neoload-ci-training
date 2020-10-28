@@ -9,6 +9,7 @@ HOME=/home/orasilabs
 
 if [ ! -d "$HOME/startup" ]; then
   mkdir -p $HOME/startup/
+fi
 
 if [ ! -d "$HOME/startup/neoload-ci-training" ]; then
   cd $HOME/startup/ && git clone https://github.com/paulsbruce/neoload-ci-training.git
