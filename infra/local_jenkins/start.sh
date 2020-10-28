@@ -96,8 +96,6 @@ docker container run \
   jenkinsci/blueocean:latest
 # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
 
-sleep 10s
-
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
 
 source "`dirname $0`"/wait_for_jenkins_up.sh

@@ -12,7 +12,6 @@ fi
 has_error=0
 case "$JENKINS_SECRET" in
   *initialAdminPassword*) has_error=1 ;;
-  *No such file*) has_error=1 ;;
   *)         has_error=0 ;;
 esac
 
