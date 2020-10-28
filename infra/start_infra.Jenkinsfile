@@ -55,7 +55,7 @@ pipeline {
               if(zone_id.trim().length() < 1) // dynamically pick a zone
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
-              sh "neoload test-settings --zone ${zone_id} --lgs 2 --scenario sanityScenario createoruse 'infra-harness-${env.agent_name}'"
+              sh "neoload test-settings --zone ${zone_id} --lgs 2 --scenario sanityScenario createorpatch 'infra-harness-${env.agent_name}'"
             }
 
             sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"

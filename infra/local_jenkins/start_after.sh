@@ -114,10 +114,13 @@ function cp_pipeline_job() {
 cli_prep_fp=$(mkf_copy "$cli_prep" 'jenkins.cli.prep.sh')
 chmod_x $cli_prep_fp
 
-docker cp "`dirname $0`"/jenkins.cli.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.steps.sh
-chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.steps.sh"
+docker cp "`dirname $0`"/jenkins.cli.plugin.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.plugin.steps.sh
+chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.plugin.steps.sh"
 
-contents_config="
+docker cp "`dirname $0`"/jenkins.cli.job.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.job.steps.sh
+chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.job.steps.sh"
+
+plugin_steps="
 #!/bin/sh
 
 source $cli_prep_fp
@@ -127,11 +130,24 @@ echo 'Applying NLW secret to credential store'
 cat $credential_xml_fp | jcli create-credentials-by-xml system::system::jenkins \"(global)\"
 set -e
 
-source $INSIDE_JENKINS_HOME/jenkins.cli.steps.sh
+source $INSIDE_JENKINS_HOME/jenkins.cli.plugin.steps.sh
 "
-contents_config_fp=$(mkf_copy "$contents_config" 'jenkins.config.sh')
-chmod_x $contents_config_fp
-docker exec -it jenkins-blueocean sh $contents_config_fp
+plugin_steps_fp=$(mkf_copy "$plugin_steps" 'jenkins.plugin_steps.sh')
+chmod_x $plugin_steps_fp
+docker exec -it jenkins-blueocean sh $plugin_steps_fp
+
+source "`dirname $0`"/wait_for_jenkins_up.sh
+
+job_steps="
+#!/bin/sh
+
+source $cli_prep_fp
+
+source $INSIDE_JENKINS_HOME/jenkins.cli.job.steps.sh
+"
+job_steps_fp=$(mkf_copy "$job_steps" 'jenkins.job_steps.sh')
+chmod_x $job_steps_fp
+docker exec -it jenkins-blueocean sh $job_steps_fp
 
 echo "Jenkins secret: $JENKINS_SECRET"
 

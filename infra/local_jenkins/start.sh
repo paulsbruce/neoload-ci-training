@@ -77,29 +77,39 @@ docker container run \
   --publish 2376:2376 \
   docker:dind
 
+function run_jenkins_container() {
+  additional_java_opts=$(echo "$1")
+  docker container run \
+    --name jenkins-blueocean \
+    --label 'jenkins' \
+    --rm \
+    --detach \
+    --network jenkins \
+    --env DOCKER_HOST=$DOCKER_TCP_URI \
+    --env DOCKER_CERT_PATH=/certs/client \
+    --env DOCKER_TLS_VERIFY=1 \
+    --env JAVA_OPTS="$additional_java_opts -Djava.awt.headless=true" \
+    --publish $JENKINS_HTTP_PORT:8080 \
+    --publish 50000:50000 \
+    --volume jenkins-home:/var/jenkins_home \
+    --volume jenkins-docker-certs:/certs/client:ro \
+    --add-host nlweb.shared:$NLW_HOST_IP \
+    jenkinsci/blueocean:latest
+  # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
+}
+
 docker pull jenkinsci/blueocean:latest
-docker container run \
-  --name jenkins-blueocean \
-  --label 'jenkins' \
-  --rm \
-  --detach \
-  --network jenkins \
-  --env DOCKER_HOST=$DOCKER_TCP_URI \
-  --env DOCKER_CERT_PATH=/certs/client \
-  --env DOCKER_TLS_VERIFY=1 \
-  --env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=true -Djava.awt.headless=true" \
-  --publish $JENKINS_HTTP_PORT:8080 \
-  --publish 50000:50000 \
-  --volume jenkins-home:/var/jenkins_home \
-  --volume jenkins-docker-certs:/certs/client:ro \
-  --add-host nlweb.shared:$NLW_HOST_IP \
-  jenkinsci/blueocean:latest
-# -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
+run_jenkins_container ""
 
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
 source "`dirname $0`"/start_after.sh
+
+docker stop jenkins-blueocean
+run_jenkins_container "-Djenkins.install.runSetupWizard=false -Djenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=true"
+
+source "`dirname $0`"/wait_for_jenkins_up.sh
 
 CURL_CONTENTS=$(curl -s -L $LOGIN_URL)
 if [[ "$CURL_CONTENTS" == *"initialAdminPassword"* ]];then
