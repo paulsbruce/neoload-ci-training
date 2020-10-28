@@ -108,9 +108,9 @@ else
 fi
 
 if [ -t 0 ]; then
-  if [ -z "$(which open)" ]; then
+  if [ "$(which open)" ]; then
     open $EXT_JENKINS_URL
-  elif [ -z "$(which xdg-open)" ]; then
+  elif [ "$(which xdg-open)" ]; then
     xdg-open $EXT_JENKINS_URL
   fi
 fi
