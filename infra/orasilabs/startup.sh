@@ -1,11 +1,18 @@
 #!/bin/sh
 set -e
-sudo apt-get install git
+
+if [ ! "$(which git)" ]; then
+  sudo apt-get install -y -q git
+
 HOME=/home/orasilabs
-mkdir -p $HOME/startup/
+
+if [ ! -d "$HOME/startup" ]; then
+  mkdir -p $HOME/startup/
+
 if [ ! -d "$HOME/startup/neoload-ci-training" ]; then
   cd $HOME/startup/ && git clone https://github.com/paulsbruce/neoload-ci-training.git
 else
   cd $HOME/startup/neoload-ci-training && git pull
 fi
+
 $HOME/startup/neoload-ci-training/infra/local_jenkins/start.sh
