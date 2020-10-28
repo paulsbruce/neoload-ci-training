@@ -46,11 +46,21 @@ fi
 JENKINS_HTTP_PORT=80
 
 NLW_HOST=nlweb.shared
+NLW_HOST_API_BASE=http://$NLW_HOST:8080
 NLW_HOST_IP=$(ping -c 1 -t 1 $NLW_HOST | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
 
 if [ -z "$NLW_HOST_IP" ]; then
   echo "Could not find the IP address for a server/hostname called $NLW_HOST"
   exit 2
+fi
+
+NLW_INFO=$(curl -s -L GET "$NLW_HOST_API_BASE/v2/information" -H "accept: application/json" -H "accountToken: $NLW_TOKEN")
+echo $NLW_INFO
+if [[ "$NLW_INFO" == *"front_url"* ]];then
+  echo "NLW_TOKEN WORKED!"
+else
+  echo "NLW_TOKEN FAILED TO INTERACT WITH $NLW_HOST_API_BASE !"
+  exit 3
 fi
 
 EXT_JENKINS_URL=http://localhost:$JENKINS_HTTP_PORT
