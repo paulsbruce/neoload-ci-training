@@ -40,8 +40,8 @@ if [ -z "$(docker volume ls -q --filter 'name=jenkins-docker-certs')" ]; then
   docker volume create --label "jenkins" jenkins-docker-certs
 fi
 
-if [ -z "$(docker volume ls -q --filter 'name=jenkins-data')" ]; then
-  docker volume create --label "jenkins" jenkins-data
+if [ -z "$(docker volume ls -q --filter 'name=jenkins-home')" ]; then
+  docker volume create --label "jenkins" jenkins-home
 fi
 
 if [ -z "$(docker volume ls -q --filter 'name=dind-volumes')" ]; then
@@ -69,7 +69,7 @@ docker container run \
   --network-alias docker \
   --env DOCKER_TLS_CERTDIR=/certs \
   --volume jenkins-docker-certs:/certs/client \
-  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-home:/var/jenkins_home \
   --volume dind-volumes:/var/lib/docker/volumes \
   --volume dind-overlay2:/var/lib/docker/overlay2 \
   --volume dind-image:/var/lib/docker/image \
@@ -87,10 +87,10 @@ docker container run \
   --env DOCKER_HOST=$DOCKER_TCP_URI \
   --env DOCKER_CERT_PATH=/certs/client \
   --env DOCKER_TLS_VERIFY=1 \
-  --env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true" \
+  --env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=true -Djava.awt.headless=true" \
   --publish $JENKINS_HTTP_PORT:8080 \
   --publish 50000:50000 \
-  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-home:/var/jenkins_home \
   --volume jenkins-docker-certs:/certs/client:ro \
   --add-host nlweb.shared:$NLW_HOST_IP \
   jenkinsci/blueocean:latest
