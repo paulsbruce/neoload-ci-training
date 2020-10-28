@@ -9,7 +9,14 @@ if [ -z "$JENKINS_SECRET" ]; then
   exit 1
 fi
 
-if [ "$JENKINS_SECRET" == *:* ] || [ "$JENKINS_SECRET" == *initialAdminPassword* ]; then
+has_error=0
+case "$JENKINS_SECRET" in
+  *initialAdminPassword*) has_error=1 ;;
+  *No such file*) has_error=1 ;;
+  *)         has_error=0 ;;
+esac
+
+if [ "$has_error" == "1" ]; then
   echo "Jenkins secret token was not valid!!! '$JENKINS_SECRET'"
   exit 2
 fi
