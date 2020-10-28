@@ -3,6 +3,7 @@ set -e
 
 if [ ! "$(which git)" ]; then
   sudo apt-get install -y -q git
+fi
 
 HOME=/home/orasilabs
 
