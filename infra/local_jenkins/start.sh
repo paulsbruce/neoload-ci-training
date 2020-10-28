@@ -87,6 +87,7 @@ docker container run \
   --env DOCKER_HOST=$DOCKER_TCP_URI \
   --env DOCKER_CERT_PATH=/certs/client \
   --env DOCKER_TLS_VERIFY=1 \
+  --env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true" \
   --publish $JENKINS_HTTP_PORT:8080 \
   --publish 50000:50000 \
   --volume jenkins-data:/var/jenkins_home \
@@ -94,7 +95,6 @@ docker container run \
   --add-host nlweb.shared:$NLW_HOST_IP \
   jenkinsci/blueocean:latest
 # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
-#--env JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true" \
 
 sleep 10s
 
