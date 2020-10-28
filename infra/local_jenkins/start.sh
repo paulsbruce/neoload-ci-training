@@ -99,8 +99,6 @@ docker container run \
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
-source "`dirname $0`"/require_jenkins_secret.sh
-echo "JENKINS_SECRET: $JENKINS_SECRET"
 source "`dirname $0`"/start_after.sh
 
 CURL_CONTENTS=$(curl -s -L $LOGIN_URL)
