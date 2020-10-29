@@ -2,7 +2,10 @@
 set -e
 set +x
 
-. "`dirname $0`"/../globals.sh
+if [ -z "$JENKINS_HTTP_PORT" ]; then
+  . "`dirname $0`"/../globals.sh
+fi
+
 . "`dirname $0`"/common.sh
 
 echo "NeoLoad Web Host IP: $NLW_HOST_IP"
