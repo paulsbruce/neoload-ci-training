@@ -67,16 +67,12 @@ def call(Map params) {
           }
         }
         stages {
-          stage('Prepare agent') {
+          stage('Prepare Neoload CLI') {
             steps {
               sh 'neoload --version'
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
                 sh "neoload login --url ${env.api_url} $NLW_TOKEN"
               }
-            }
-          }
-          stage('Prepare Neoload CLI') {
-            steps {
               script {
                 def zone_id = env.zone_id
                 if(zone_id.trim().toLowerCase().equals("null")) zone_id = ""
@@ -90,7 +86,7 @@ def call(Map params) {
               }
             }
           }
-          stage('Prepare Test Assets') {
+          stage('Prepare Dynamic Assets') {
             steps {
               writeFile(file: "d.overrides.yaml", text:"""
 scenarios:
