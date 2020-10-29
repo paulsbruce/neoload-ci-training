@@ -20,18 +20,6 @@ pipeline {
         }
       }
     }
-    /*
-    stage ('Check/Build Docker Agent') {
-      agent any
-      steps {
-        script {
-          imgCount = sh(script: "docker images -a --filter='label=${env.docker_label}' --format='{{.ID}}' | wc -l", returnStdout: true).toInteger()
-          if(imgCount < 1)
-            docker.build("${env.docker_label}:latest", "--rm --label '${env.docker_label}' -f ./infra/JenkinsBuildAgent.Dockerfile .")
-        }
-      }
-    }
-    */
     stage('Attach Worker') {
       agent {
         docker {
