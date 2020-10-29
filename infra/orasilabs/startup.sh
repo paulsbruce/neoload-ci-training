@@ -7,21 +7,21 @@ if [ ! "$(which git)" ]; then
   sudo apt-get install -y -q git
 fi
 
-HOME=/home/orasilabs
+HOME_DIR=/home/orasilabs
 
 # create a separate directory for latest examples repo (includes startup config)
-if [ ! -d "$HOME/startup" ]; then
-  mkdir -p $HOME/startup/
+if [ ! -d "$HOME_DIR/startup" ]; then
+  mkdir -p $HOME_DIR/startup/
 fi
 
 # clone or pull latest example repo
-if [ ! -d "$HOME/startup/neoload-ci-training" ]; then
-  cd $HOME/startup/ && git clone $git_repo_url
+if [ ! -d "$HOME_DIR/startup/neoload-ci-training" ]; then
+  cd $HOME_DIR/startup/ && git clone $git_repo_url
 else
-  cd $HOME/startup/neoload-ci-training && git pull
+  cd $HOME_DIR/startup/neoload-ci-training && git pull
 fi
 
-cd $HOME/startup/neoload-ci-training && git checkout $git_branch
+cd $HOME_DIR/startup/neoload-ci-training && git checkout $git_branch
 
 
 JENKINS_HTTP_PORT=80
@@ -40,4 +40,4 @@ export JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT
 export NLW_HOST=$NLW_HOST
 export NLW_HOST_IP=$NLW_HOST_IP
 # every time this VM is booted, run the initial Jenkins setup (persists data between sessions)
-cd $HOME/startup/neoload-ci-training && infra/local_jenkins/start.sh
+cd $HOME_DIR/startup/neoload-ci-training && infra/local_jenkins/start.sh

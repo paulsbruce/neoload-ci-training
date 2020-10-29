@@ -2,11 +2,13 @@
 set -e
 set +x
 
-echo "common got JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT"
+echo "common got JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT NLW_HOST=$NLW_HOST"
 
 if [ -z "$JENKINS_HTTP_PORT" ]; then
   . "`dirname $0`"/../globals.sh
 fi
+
+echo "common using JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT NLW_HOST=$NLW_HOST"
 
 . "`dirname $0`"/common.sh
 

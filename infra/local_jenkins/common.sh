@@ -21,9 +21,12 @@ if [ -z "$(which curl)" ]; then
 fi
 
 token_file="`dirname $0`"/nlw_token
+echo $token_file
 if [ ! -f "$token_file" ]; then
-  token_file=~/nlw_token
+  eval homedir=~
+  token_file=$homedir/nlw_token
 fi
+echo $token_file
 if [ -f "$token_file" ]; then
   NLW_TOKEN=$(cat $token_file | tr -d '\r' | tr -d '\n' | tr -d ' ')
 fi
