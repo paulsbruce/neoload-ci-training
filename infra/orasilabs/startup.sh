@@ -36,9 +36,5 @@ else
   sleep 3
 fi
 
-echo "Exiting"
-exit 50
-
-
 # every time this VM is booted, run the initial Jenkins setup (persists data between sessions)
 sudo $HOME/startup/neoload-ci-training/infra/local_jenkins/start.sh
