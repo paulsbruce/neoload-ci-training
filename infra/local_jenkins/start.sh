@@ -2,6 +2,7 @@
 set -e
 set +x
 
+. "`dirname $0`"/../globals.sh
 . "`dirname $0`"/common.sh
 
 echo "NeoLoad Web Host IP: $NLW_HOST_IP"

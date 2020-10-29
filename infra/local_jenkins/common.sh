@@ -43,8 +43,6 @@ else
   echo "NLW_TOKEN: $masked"
 fi
 
-JENKINS_HTTP_PORT=80
-
 NLW_HOST=nlweb.shared
 NLW_HOST_API_BASE=http://$NLW_HOST:8080
 NLW_HOST_IP=$(ping -c 1 -t 1 $NLW_HOST | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')

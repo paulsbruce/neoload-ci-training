@@ -8,8 +8,6 @@ echo 'Applying initial configurations to Jenkins container'
 
 INSIDE_JENKINS_HOME=/var/jenkins_home
 PIPELINE_TEMPLATE_FILE=pipeline.job.template.xml
-git_repo_url=https://github.com/paulsbruce/neoload-ci-training.git
-git_branch=master
 
 docker cp "`dirname $0`"/$PIPELINE_TEMPLATE_FILE jenkins-blueocean:$INSIDE_JENKINS_HOME/$PIPELINE_TEMPLATE_FILE
 
