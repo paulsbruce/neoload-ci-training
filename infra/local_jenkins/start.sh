@@ -2,6 +2,8 @@
 set -e
 set +x
 
+echo "common got JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT"
+
 if [ -z "$JENKINS_HTTP_PORT" ]; then
   . "`dirname $0`"/../globals.sh
 fi
