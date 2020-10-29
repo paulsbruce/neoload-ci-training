@@ -21,20 +21,14 @@ def call(Map params) {
     }
 
     stages {
-      stage ('Validate inputs') {
-        agent any
-        steps {
-          script {
-            if(env.lg_count.toInteger() > 2)
-              error "You cannot use more than 2 load generators without assistance."
-          }
-        }
-      }
-      stage ('Prep workspace') {
+      stage ('Validate pipline') {
         agent any
         steps {
           cleanWs()
           script {
+            if(env.lg_count.toInteger() > 2)
+              error "You cannot use more than 2 load generators without assistance."
+
             sh "uname -a"
             env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
             env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
@@ -46,16 +40,6 @@ def call(Map params) {
             if(!isNullOrEmpty(env.load_scenario_name)) {
               env.actual_scenario_name = env.load_scenario_name
             }
-          }
-        }
-      }
-      stage ('Check/Build Docker Agent') {
-        agent any
-        steps {
-          script {
-            imgCount = sh(script: "docker images -a --filter='label=${env.docker_label}' --format='{{.ID}}' | wc -l", returnStdout: true).toInteger()
-            if(imgCount < 1)
-              docker.build("${env.docker_label}:latest", "--rm --label '${env.docker_label}' -f ./infra/JenkinsBuildAgent.Dockerfile .")
           }
         }
       }
@@ -86,7 +70,7 @@ def call(Map params) {
               }
             }
           }
-          stage('Prepare Dynamic Assets') {
+          stage('Upload Assets to NeoLoad Web') {
             steps {
               writeFile(file: "d.overrides.yaml", text:"""
 scenarios:
@@ -108,10 +92,7 @@ sla_profiles:
   - error-rate fail >= 20% per test
               """)
               stash includes: 'd.*.yaml', name: 'dynamics'
-            }
-          }
-          stage('Upload Test Assets') {
-            steps {
+
               dir("${env.test_dir}") {
                 unstash 'dynamics'
               }
