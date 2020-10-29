@@ -28,7 +28,7 @@ JENKINS_HTTP_PORT=80
 NLW_HOST=nlweb.shared
 NLW_HOST_API_BASE=http://$NLW_HOST:8080
 
-NLW_HOST_IP=$(sudo ping -c1 -t1 $NLW_HOST 2>/dev/null | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
+NLW_HOST_IP=$(sudo ping -c1 -t1 -W1 $NLW_HOST 2>/dev/null | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])')
 if "$NLW_HOST_IP" == "" ; then
   echo "Cannot resolve the IP address for $NLW_HOST. Please discuss with your workshop instructor."
   exit 3
