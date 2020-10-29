@@ -83,9 +83,9 @@ cli_prep="
 set -e
 
 export JENKINS_URL=$INT_JENKINS_URL JENKINS_USER_ID=$JENKINS_USER_ID JENKINS_API_TOKEN=$JENKINS_SECRET
-echo JENKINS_URL: $INT_JENKINS_URL
-echo JENKINS_USER_ID: $JENKINS_USER_ID
-echo JENKINS_API_TOKEN: $JENKINS_SECRET
+#echo JENKINS_URL: $INT_JENKINS_URL
+#echo JENKINS_USER_ID: $JENKINS_USER_ID
+#echo JENKINS_API_TOKEN: $JENKINS_SECRET
 
 curl -s -L $INT_JENKINS_URL/jnlpJars/jenkins-cli.jar -o /var/jenkins_home/jenkins-cli.jar
 function jcli() {
@@ -147,6 +147,6 @@ job_steps_fp=$(mkf_copy "$job_steps" 'jenkins.job_steps.sh')
 chmod_x $job_steps_fp
 docker exec -it jenkins-blueocean sh $job_steps_fp
 
-echo "Jenkins secret: $JENKINS_SECRET"
+#echo "Jenkins secret: $JENKINS_SECRET"
 
 source "`dirname $0`"/wait_for_jenkins_up.sh

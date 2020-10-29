@@ -2,12 +2,14 @@
 set -e
 
 repo="$(pwd)/infra/local_jenkins/start.sh"
-echo $repo
 if [ ! -f "$repo" ]; then
   echo "You should run this at the root of the training repo."
   exit 1
 fi
 HOME_DIR=$(pwd)
+
+git_branch=$(git branch | awk '/\*/ { print $2; }')
+export git_branch=$git_branch
 
 . "`dirname $0`"/../globals.sh
 
@@ -32,4 +34,5 @@ export JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT
 export NLW_HOST=$NLW_HOST
 export NLW_HOST_IP=$NLW_HOST_IP
 # every time this VM is booted, run the initial Jenkins setup (persists data between sessions)
-infra/local_jenkins/start.sh ${@:2}
+
+infra/local_jenkins/start.sh ${@:1}

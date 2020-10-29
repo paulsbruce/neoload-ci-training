@@ -2,7 +2,11 @@
 set -e
 set +x
 
-echo "common got JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT NLW_HOST=$NLW_HOST"
+#echo "start got:"
+#echo "JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT"
+#echo "NLW_HOST=$NLW_HOST"
+#echo "git_repo_url=$git_repo_url"
+#echo "git_branch=$git_branch"
 
 if [ -z "$JENKINS_HTTP_PORT" ]; then
   . "`dirname $0`"/../globals.sh
@@ -10,6 +14,7 @@ fi
 
 echo "common using JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT NLW_HOST=$NLW_HOST"
 
+. "`dirname $0`"/common.sh
 . "`dirname $0`"/common.sh
 
 echo "NeoLoad Web Host IP: $NLW_HOST_IP"
@@ -65,8 +70,8 @@ if [ -z "$(docker volume ls -q --filter 'name=dind-containers')" ]; then
   docker volume create --label "dind=yes" dind-containers
 fi
 
-echo "Using Docker-in-Docker"
-docker pull docker:dind
+echo "Starting Docker-in-Docker container"
+docker pull -q docker:dind
 docker container run \
   --name jenkins-docker \
   --label 'jenkins' \
@@ -83,9 +88,11 @@ docker container run \
   --volume dind-image:/var/lib/docker/image \
   --volume dind-containers:/var/lib/docker/containers \
   --publish 2376:2376 \
-  docker:dind
+  docker:dind \
+  1>/dev/null
 
 function run_jenkins_container() {
+  echo "Starting jenkins container"
   additional_java_opts=$(echo "$1")
   docker container run \
     --name jenkins-blueocean \
@@ -102,11 +109,12 @@ function run_jenkins_container() {
     --volume jenkins-home:/var/jenkins_home \
     --volume jenkins-docker-certs:/certs/client:ro \
     --add-host nlweb.shared:$NLW_HOST_IP \
-    jenkinsci/blueocean:latest
+    jenkinsci/blueocean:latest \
+    1>/dev/null
   # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
 }
 
-docker pull jenkinsci/blueocean:latest
+docker pull -q jenkinsci/blueocean:latest
 run_jenkins_container ""
 
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
@@ -114,17 +122,17 @@ docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade
 source "`dirname $0`"/wait_for_jenkins_up.sh
 source "`dirname $0`"/start_after.sh
 
-docker stop jenkins-blueocean
+docker stop jenkins-blueocean 1>/dev/null
 run_jenkins_container "-Djenkins.install.runSetupWizard=false -Djenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=true"
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
 
-CURL_CONTENTS=$(curl -s -L $LOGIN_URL)
-if [[ "$CURL_CONTENTS" == *"initialAdminPassword"* ]];then
-  JENKINS_SECRET=$(docker exec -it --user root jenkins-blueocean cat /var/jenkins_home/secrets/initialAdminPassword)
-  echo "Please use your Jenkins initial admin password: $JENKINS_SECRET"
-else
-  echo "Jenkins is already initialized and ready to use."
+if [ "$JENKINS_SECRET" ]; then
+  echo "-------------------------------------------------------------------------"
+  echo "-------------------------------------------------------------------------"
+  echo "-- Use this password for Jenkins: $JENKINS_SECRET"
+  echo "-------------------------------------------------------------------------"
+  echo "-------------------------------------------------------------------------"
 fi
 
 if [ -t 0 ]; then
