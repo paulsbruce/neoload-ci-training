@@ -41,8 +41,8 @@ pipeline {
         stage('') {
           steps {
             script {
-              env.agent_ip = sh(script: "curl -s -L https://ipinfo.io/ip", returnStdout: true).trim()
-              env.agent_geo = sh(script: "curl -s -L https://freegeoip.app/json/${env.agent_ip} | jq '.time_zone'", returnStdout: true).trim()
+              env.agent_ip = sh(script: "curl -s -L --insecure https://ipinfo.io/ip", returnStdout: true).trim()
+              env.agent_geo = sh(script: "curl -s -L --insecure https://freegeoip.app/json/${env.agent_ip} | jq '.time_zone'", returnStdout: true).trim()
               sh "export AGENT_GEO=${env.agent_geo}"
             }
           }
