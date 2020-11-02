@@ -17,8 +17,6 @@ pipeline {
           sh "uname -a"
           env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true).trim()
           env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
-          env.agent_ip = sh(script: "curl -s -L https://ipinfo.io/ip", returnStdout: true).trim()
-          env.agent_geo = sh(script: "curl -s -L https://freegeoip.app/json/${env.agent_ip} | jq '.time_zone'", returnStdout: true).trim()
         }
       }
     }
@@ -36,16 +34,26 @@ pipeline {
       agent {
         docker {
           image "${env.docker_label}:latest"
-          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -u root --privileged -v /var/run/docker.sock:/var/run/docker.sock -e AGENT_GEO='${env.agent_geo}'"
+          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -u root --privileged -v /var/run/docker.sock:/var/run/docker.sock"
         }
       }
       stages {
+        stage('') {
+          steps {
+            script {
+              env.agent_ip = sh(script: "curl -s -L https://ipinfo.io/ip", returnStdout: true).trim()
+              env.agent_geo = sh(script: "curl -s -L https://freegeoip.app/json/${env.agent_ip} | jq '.time_zone'", returnStdout: true).trim()
+              sh "export AGENT_GEO=${env.agent_geo}"
+            }
+          }
+        }
         stage('NeoLoad login') {
           steps {
             sh 'neoload --version'
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
             }
+            sh 'printenv'
           }
         }
         stage('Start docker load infra') {
