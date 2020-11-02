@@ -17,8 +17,8 @@ pipeline {
           sh "uname -a"
           env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true).trim()
           env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
-          env.agent_ip = sh(script: "curl https://ipinfo.io/ip", returnStdout: true)
-          env.agent_geo = sh(script: "curl https://freegeoip.app/json/${env.agent_ip} | jq '.time_zone'", returnStdout: true)
+          env.agent_ip = sh(script: "curl -s -L https://ipinfo.io/ip", returnStdout: true)
+          env.agent_geo = sh(script: "curl -s -L https://freegeoip.app/json/${env.agent_ip} | jq '.time_zone'", returnStdout: true)
         }
       }
     }
