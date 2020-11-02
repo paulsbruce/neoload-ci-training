@@ -80,14 +80,16 @@ else
   exit 3
 fi
 
-EXT_JENKINS_URL=http://localhost:$JENKINS_HTTP_PORT
+LOCAL_HOST_NAME=$(uname -n)
+EXT_JENKINS_URL=http://$LOCAL_HOST_NAME:$JENKINS_HTTP_PORT
 INT_JENKINS_URL=http://localhost:8080 # this is always the case from inside blueocean container
 STATIC_JENKINS_URL=http://127.0.0.1/
 DOCKER_TCP_URI=tcp://docker:2376
 
 if [ "$should_echo_infos" == "1" ]; then
   echo "$NLW_HOST => $NLW_HOST_IP"
-  echo "DOCKER_TCP_URI => $DOCKER_TCP_URI"
+  #echo "DOCKER_TCP_URI => $DOCKER_TCP_URI"
+  echo "LOCAL_HOST_NAME => $LOCAL_HOST_NAME"
 fi
 
 if [ "$1" == "debug" ]; then

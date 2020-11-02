@@ -51,6 +51,14 @@ rdc_xml="<?xml version='1.1' encoding='UTF-8'?>
 </jenkins.security.ResourceDomainConfiguration>"
 rdc_xml_fp=$(mkf_copy "$rdc_xml" 'jenkins.security.ResourceDomainConfiguration.xml')
 
+jlc_xml="<?xml version='1.1' encoding='UTF-8'?>
+<jenkins.model.JenkinsLocationConfiguration>
+  <adminAddress>address not configured yet &lt;nobody@nowhere&gt;</adminAddress>
+  <jenkinsUrl>$EXT_JENKINS_URL</jenkinsUrl>
+</jenkins.model.JenkinsLocationConfiguration>"
+jlc_xml_fp=$(mkf_copy "$jlc_xml" 'jenkins.model.JenkinsLocationConfiguration.xml')
+
+
 shared_libs_xml="<?xml version='1.1' encoding='UTF-8'?>
 <org.jenkinsci.plugins.workflow.libs.GlobalLibraries plugin=\"workflow-cps-global-lib@2.17\">
   <libraries>
