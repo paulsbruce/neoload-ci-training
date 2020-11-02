@@ -138,7 +138,7 @@ sla_profiles:
                       sh """neoload run \
                         --scenario \"${env.actual_scenario_name}\" \
                         --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
-                        --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
+                        --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name} in region $AGENT_GEO\" \
                         --detached \
                         --as-code ${env.project_yaml_file_and_comma}d.overrides.yaml
                        """
@@ -160,13 +160,13 @@ sla_profiles:
                       }
                     }
                   }
-                  stage('Custom test exit criteria') {
+                  /*stage('Custom test exit criteria') {
                     steps {
                       script {
                         sleep(time:15,unit:"SECONDS")
                       }
                     }
-                  }
+                  }*/
                   stage('Wait for test finale') {
                     steps {
                       script {
