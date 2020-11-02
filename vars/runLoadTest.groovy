@@ -110,7 +110,7 @@ sla_profiles:
                       sanityCode = sh(script: """neoload run \
                             --scenario \"${env.sanity_scenario_name}\" \
                             --name \"sanity-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
-                            --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
+                            --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name} in region $agent_geo\" \
                             --as-code ${env.project_yaml_file_and_comma}d.overrides.yaml \
                             """, returnStatus: true)
                     }
@@ -138,7 +138,7 @@ sla_profiles:
                       sh """neoload run \
                         --scenario \"${env.actual_scenario_name}\" \
                         --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
-                        --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name} in region $AGENT_GEO\" \
+                        --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name} in region $agent_geo\" \
                         --detached \
                         --as-code ${env.project_yaml_file_and_comma}d.overrides.yaml
                        """
