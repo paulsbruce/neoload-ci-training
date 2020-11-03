@@ -6,6 +6,9 @@ set -e
 if [ ! "$(which git)" ]; then
   sudo apt-get install -y -q git
 fi
+if [ ! "$(which jq)" ]; then
+  sudo apt-get install -y -q jq
+fi
 
 HOME_DIR=/home/orasilabs
 

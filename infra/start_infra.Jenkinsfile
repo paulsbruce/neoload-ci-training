@@ -38,22 +38,12 @@ pipeline {
         }
       }
       stages {
-        stage('') {
-          steps {
-            script {
-              env.agent_ip = sh(script: "curl -s -L --insecure https://ipinfo.io/ip", returnStdout: true).trim()
-              env.agent_geo = sh(script: "curl -s -L --insecure https://freegeoip.app/json/${env.agent_ip} | jq -r '.time_zone'", returnStdout: true).trim()
-              sh "export AGENT_GEO=${env.agent_geo}"
-            }
-          }
-        }
         stage('NeoLoad login') {
           steps {
             sh 'neoload --version'
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
             }
-            sh 'printenv'
           }
         }
         stage('Start docker load infra') {
