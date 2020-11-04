@@ -106,7 +106,7 @@ project_settings:
                     --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
                     --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
                     --detached \
-                    --as-code default_mocks.yaml,d.overrides.yaml
+                    --as-code d.overrides.yaml
                    """
                 }
               }
