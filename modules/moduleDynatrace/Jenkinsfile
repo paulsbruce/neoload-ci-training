@@ -90,6 +90,8 @@ project_settings:
             dir('project/NeoLoadSeleniumExamples/') {
               unstash 'dynamics'
             }
+            sh "ls -latr project/NeoLoadSeleniumExamples/"
+            sh "cat project/NeoLoadSeleniumExamples/d.overrides.yaml"
             sh "neoload project --path project/NeoLoadSeleniumExamples/ upload"
             sh "neoload status"
           }
