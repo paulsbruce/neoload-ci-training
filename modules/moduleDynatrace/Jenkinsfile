@@ -53,7 +53,7 @@ pipeline {
               if(zone_id.trim().length() < 1) // dynamically pick a zone
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|select(.[].status==\"AVAILABLE\")|length>0) and (.loadgenerators|select(.[].status==\"AVAILABLE\")|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
-              if(zone_id == null)
+              if("null".equals(zone_id) || !zone_id?.trim())
                 error "No zones with available infrastructure were found! Please run 'Start Infra' job."
 
               sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-moduleDynatrace'"
@@ -99,12 +99,10 @@ servers:
           steps {
             dir('neoload_project') {
               unstash 'dynamics'
-              sh "cat d.overrides.yaml"
               sh "echo custom-resources/ >> .nlignore"
               sh "echo lib/ >> .nlignore"
-              sh "cat .nlignore"
             }
-            sh "neoload --debug project --path ./neoload_project/ upload"
+            sh "neoload project --path ./neoload_project/ upload"
             sh "neoload status"
           }
         }
