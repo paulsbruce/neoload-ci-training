@@ -33,11 +33,12 @@ pipeline {
         stage('Prepare agent') {
           steps {
             sh 'neoload --version'
+
             sh 'mkdir -p neoload_project'
             dir('neoload_project') {
               git url: 'https://github.com/paulsbruce/NeoLoadSeleniumExamples.git'
             }
-            sh 'ls -latr neoload_project'
+
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
             }
@@ -63,6 +64,7 @@ pipeline {
             withCredentials([string(credentialsId: 'DYNATRACE_URL', variable: 'DYNATRACE_URL'),string(credentialsId: 'DYNATRACE_API_TOKEN', variable: 'DYNATRACE_API_TOKEN')]) {
 
               writeFile(file: "d.overrides.yaml", text:"""
+name: NeoLoadSeleniumExamples
 scenarios:
 - name: fullTest
   populations:
@@ -87,12 +89,12 @@ project_settings:
         }
         stage('Upload Test Assets') {
           steps {
-            dir('project/NeoLoadSeleniumExamples/') {
+            dir('neoload_project') {
               unstash 'dynamics'
             }
-            sh "ls -latr project/NeoLoadSeleniumExamples/"
-            sh "cat project/NeoLoadSeleniumExamples/d.overrides.yaml"
-            sh "neoload project --path project/NeoLoadSeleniumExamples/ upload"
+            sh "ls -latr neoload_project"
+            sh "cat neoload_project/d.overrides.yaml"
+            sh "neoload project --path ./neoload_project/ upload"
             sh "neoload status"
           }
         }
