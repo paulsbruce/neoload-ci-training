@@ -8,6 +8,7 @@ pipeline {
     zone_id="${ZONE_ID}"
     full_test_max_vus = 5
     full_test_duration_mins = 3
+    reporting_timespan='10%-90%'
   }
 
   stages {
@@ -144,8 +145,52 @@ servers:
                 stage('Wait for test finale') {
                   steps {
                     script {
-                      env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
-                      print "Final status code was ${env.exitCode}"
+                      try {
+                        env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
+                        print "Final status code was ${env.exitCode}"
+                      } catch(err) {
+                        error "Waiting error: ${err}"
+                      }
+                    }
+                    sh "mkdir -p reports"
+                    script {
+                      sh """neoload report --filter='timespan=${env.reporting_timespan}' \
+                            --template builtin:transactions-csv \
+                            --out-file reports/neoload-transactions.csv \
+                            --max-rps 5 \
+                            cur
+                       """
+
+                      sh """neoload report --filter='timespan=${env.reporting_timespan}' \
+                            --template reporting/jinja/sample-custom-report.html.j2 \
+                            --out-file reports/neoload-results.html \
+                            --max-rps 5 \
+                            cur
+                       """
+                      publishHTML (target: [
+                         allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: 'reports',
+                         reportFiles: 'neoload-results.html',
+                         reportName: "NeoLoad Test Results"
+                      ])
+
+                      sh """neoload report --filter='timespan=${env.reporting_timespan};results=-5' \
+                            --template reporting/jinja/sample-trends-report.html.j2 \
+                            --out-file reports/neoload-trends.html \
+                            --type trends \
+                            --max-rps 5 \
+                            cur
+                       """
+                      publishHTML (target: [
+                         allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: 'reports',
+                         reportFiles: 'neoload-trends.html',
+                         reportName: "NeoLoad Trends (Custom)"
+                       ])
                     }
                   }
                 }
