@@ -8,8 +8,10 @@ echo 'Applying initial configurations to Jenkins container'
 
 INSIDE_JENKINS_HOME=/var/jenkins_home
 PIPELINE_TEMPLATE_FILE=pipeline.job.template.xml
+CREDENTIALS_TEMPLATE_FILE=credentials.secret.template.xml
 
 docker cp "`dirname $0`"/$PIPELINE_TEMPLATE_FILE jenkins-blueocean:$INSIDE_JENKINS_HOME/$PIPELINE_TEMPLATE_FILE
+docker cp "`dirname $0`"/$CREDENTIALS_TEMPLATE_FILE jenkins-blueocean:$INSIDE_JENKINS_HOME/$CREDENTIALS_TEMPLATE_FILE
 
 function mkf_copy() {
   contents=$(echo "$1")
@@ -35,15 +37,6 @@ function chmod_x() {
 function uuid() {
   echo $(docker exec -it --user root jenkins-blueocean cat /proc/sys/kernel/random/uuid)
 }
-
-credential_xml="<org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl plugin=\"plain-credentials@1.7\">
-  <scope>GLOBAL</scope>
-  <id>NLW_TOKEN</id>
-  <description></description>
-  <secret>$NLW_TOKEN</secret>
-</org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl>"
-credential_xml=$(echo $credential_xml | tr -d '\r' | tr -d '\n')
-credential_xml_fp=$(mkf_copy "$credential_xml" 'jenkins.nlw.xml')
 
 rdc_xml="<?xml version='1.1' encoding='UTF-8'?>
 <jenkins.security.ResourceDomainConfiguration>
@@ -116,9 +109,21 @@ function cp_pipeline_job() {
     echo \"Created job '\$job_name'\"
   fi
 }
+function cp_credentials() {
+  secret_name=\$1
+  secret_value=\$2
+  file_name=\$1.xml
+  echo \"Creating Jenkins secret \$secret_name\"
+  cp $INSIDE_JENKINS_HOME/$CREDENTIALS_TEMPLATE_FILE $INSIDE_JENKINS_HOME/secrets/\$file_name
+  sed -i \"s|{{SECRET_NAME}}|\$secret_name|g\" $INSIDE_JENKINS_HOME/secrets/\$file_name
+  sed -i \"s|{{SECRET_VALUE}}|\$secret_value|g\" $INSIDE_JENKINS_HOME/secrets/\$file_name
+  cat $INSIDE_JENKINS_HOME/secrets/\$file_name | jcli create-credentials-by-xml system::system::jenkins \"(global)\"
+  echo \$file_name
+}
 "
 cli_prep_fp=$(mkf_copy "$cli_prep" 'jenkins.cli.prep.sh')
 chmod_x $cli_prep_fp
+
 
 docker cp "`dirname $0`"/jenkins.cli.plugin.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.plugin.steps.sh
 chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.plugin.steps.sh"
@@ -126,15 +131,30 @@ chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.plugin.steps.sh"
 docker cp "`dirname $0`"/jenkins.cli.job.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.job.steps.sh
 chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.job.steps.sh"
 
-plugin_steps="
+docker cp "`dirname $0`"/jenkins.cli.secrets.steps.sh jenkins-blueocean:$INSIDE_JENKINS_HOME/jenkins.cli.secrets.steps.sh
+chmod_x "$INSIDE_JENKINS_HOME/jenkins.cli.secrets.steps.sh"
+
+
+credentials_steps="
 #!/bin/sh
 
 source $cli_prep_fp
 
-set +e
-echo 'Applying NLW secret to credential store'
-cat $credential_xml_fp | jcli create-credentials-by-xml system::system::jenkins \"(global)\"
-set -e
+export NLW_TOKEN=$NLW_TOKEN
+export DYNATRACE_URL=$DYNATRACE_URL
+export DYNATRACE_API_TOKEN=$DYNATRACE_API_TOKEN
+
+source $INSIDE_JENKINS_HOME/jenkins.cli.secrets.steps.sh
+"
+credentials_steps_fp=$(mkf_copy "$credentials_steps" 'jenkins.credentials_steps.sh')
+chmod_x $credentials_steps_fp
+docker exec -it jenkins-blueocean sh $credentials_steps_fp
+
+
+plugin_steps="
+#!/bin/sh
+
+source $cli_prep_fp
 
 source $INSIDE_JENKINS_HOME/jenkins.cli.plugin.steps.sh
 "
@@ -142,7 +162,9 @@ plugin_steps_fp=$(mkf_copy "$plugin_steps" 'jenkins.plugin_steps.sh')
 chmod_x $plugin_steps_fp
 docker exec -it jenkins-blueocean sh $plugin_steps_fp
 
+
 source "`dirname $0`"/wait_for_jenkins_up.sh
+
 
 job_steps="
 #!/bin/sh
@@ -154,6 +176,7 @@ source $INSIDE_JENKINS_HOME/jenkins.cli.job.steps.sh
 job_steps_fp=$(mkf_copy "$job_steps" 'jenkins.job_steps.sh')
 chmod_x $job_steps_fp
 docker exec -it jenkins-blueocean sh $job_steps_fp
+
 
 #echo "Jenkins secret: $JENKINS_SECRET"
 

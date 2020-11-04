@@ -1,0 +1,153 @@
+pipeline {
+  agent none
+
+  environment {
+    docker_label="nljenkinsagent"
+    nlw_host="nlweb.shared"
+    api_url="http://${env.nlw_host}:8080"
+    zone_id="${ZONE_ID}"
+    full_test_max_vus = 5
+    full_test_duration_mins = 3
+  }
+
+  stages {
+    stage ('Prep workspace') {
+      agent any
+      steps {
+        cleanWs()
+        script {
+          sh "uname -a"
+          env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
+          env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
+        }
+      }
+    }
+    stage('Attach Worker') {
+      agent {
+        docker {
+          image "${env.docker_label}:latest"
+          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -e PYTHONUNBUFFERED=1"
+        }
+      }
+      stages {
+        stage('Prepare agent') {
+          steps {
+            sh 'neoload --version'
+            sh 'mkdir -p neoload_project'
+            dir('neoload_project') {
+              git url: 'https://github.com/paulsbruce/NeoLoadSeleniumExamples.git'
+            }
+            sh 'ls -latr neoload_project'
+            withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
+              sh "neoload login --url ${env.api_url} $NLW_TOKEN"
+            }
+          }
+        }
+        stage('Prepare Neoload CLI') {
+          steps {
+            script {
+              def zone_id = env.zone_id
+              if(zone_id.trim().toLowerCase().equals("null")) zone_id = ""
+              if(zone_id.trim().length() < 1) // dynamically pick a zone
+                zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|select(.[].status==\"AVAILABLE\")|length>0) and (.loadgenerators|select(.[].status==\"AVAILABLE\")|length>0) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
+
+              if(zone_id == null)
+                error "No zones with available infrastructure were found! Please run 'Start Infra' job."
+
+              sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-moduleDynatrace'"
+            }
+          }
+        }
+        stage('Prepare Test Assets') {
+          steps {
+            withCredentials([string(credentialsId: 'DYNATRACE_URL', variable: 'DYNATRACE_URL'),string(credentialsId: 'DYNATRACE_API_TOKEN', variable: 'DYNATRACE_API_TOKEN')]) {
+
+              writeFile(file: "d.overrides.yaml", text:"""
+scenarios:
+- name: fullTest
+  populations:
+  - name: popPost
+    rampup_load:
+      min_users: 1
+      max_users: ${env.full_test_max_vus}
+      increment_users: 1
+      increment_every: 5s
+      duration: ${env.full_test_duration_mins}m
+  apm_configuration:
+    dynatrace_tags:
+    - neotys-cpt
+project_settings:
+  dynatrace.enabled: true
+  dynatrace.url: ${DYNATRACE_URL}
+  dynatrace.token: ${DYNATRACE_API_TOKEN}
+            """)
+              stash includes: 'd.*.yaml', name: 'dynamics'
+            }
+          }
+        }
+        stage('Upload Test Assets') {
+          steps {
+            dir('project/NeoLoadSeleniumExamples/') {
+              unstash 'dynamics'
+            }
+            sh "neoload project --path project/NeoLoadSeleniumExamples/ upload"
+            sh "neoload status"
+          }
+        }
+        stage('Run Test') {
+          stages {
+            stage('Kick off test async') {
+              steps {
+                wrap([$class: 'BuildUser']) {
+                  sh """neoload run \
+                    --scenario fullTest \
+                    --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
+                    --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
+                    --detached \
+                    --as-code default_mocks.yaml,d.overrides.yaml
+                   """
+                }
+              }
+            }
+            stage('Monitor test') {
+              parallel {
+                stage('Monitor SLAs') {
+                  steps {
+                    script {
+                      logs_url = sh(script: "neoload logs-url cur", returnStdout: true).trim()
+                      echo "Logs url: ${logs_url}"
+
+                      sh "neoload fastfail --max-failure 25 slas cur"
+                    }
+                  }
+                }
+                stage('Custom test exit criteria') {
+                  steps {
+                    script {
+                      sleep(time:15,unit:"SECONDS")
+                    }
+                  }
+                }
+                stage('Wait for test finale') {
+                  steps {
+                    script {
+                      env.exitCode = sh(script: "neoload wait cur", returnStatus: true)
+                      print "Final status code was ${env.exitCode}"
+                    }
+                  }
+                }
+              } //end parallel
+            }
+          } // end stages
+          post {
+            always {
+              sh "neoload test-results junitsla"
+              junit testResults: 'junit-sla.xml', allowEmptyResults: true
+              archiveArtifacts artifacts: 'd.*.yaml'
+            }
+          }
+        }
+      }
+    }
+  }
+}
