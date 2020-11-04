@@ -82,6 +82,13 @@ project_settings:
   dynatrace.enabled: true
   dynatrace.url: ${DYNATRACE_URL}
   dynatrace.token: ${DYNATRACE_API_TOKEN}
+variables:
+- constant:
+    name: app_server_hostname
+    value: 35.153.194.37
+servers:
+- name: ushahidi
+  host: ${app_server_hostname}
             """)
               stash includes: 'd.*.yaml', name: 'dynamics'
             }
