@@ -92,8 +92,8 @@ project_settings:
             dir('neoload_project') {
               unstash 'dynamics'
               sh "cat d.overrides.yaml"
-              sh "echo custom-resources >> .nlignore"
-              sh "echo lib >> .nlignore"
+              sh "echo custom-resources/ >> .nlignore"
+              sh "echo lib/ >> .nlignore"
               sh "cat .nlignore"
             }
             sh "neoload --debug project --path ./neoload_project/ upload"
