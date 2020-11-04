@@ -64,6 +64,7 @@ pipeline {
             withCredentials([string(credentialsId: 'DYNATRACE_URL', variable: 'DYNATRACE_URL'),string(credentialsId: 'DYNATRACE_API_TOKEN', variable: 'DYNATRACE_API_TOKEN')]) {
 
               writeFile(file: "d.overrides.yaml", text:"""
+name: NeoLoadSeleniumExamples
 scenarios:
 - name: fullTest
   populations:
@@ -74,6 +75,13 @@ scenarios:
       increment_users: 1
       increment_every: 5s
       duration: ${env.full_test_duration_mins}m
+  apm_configuration:
+    dynatrace_tags:
+    - neotys-cpt
+project_settings:
+  dynatrace.enabled: true
+  dynatrace.url: ${DYNATRACE_URL}
+  dynatrace.token: ${DYNATRACE_API_TOKEN}
             """)
               stash includes: 'd.*.yaml', name: 'dynamics'
             }
@@ -84,9 +92,8 @@ scenarios:
             dir('neoload_project') {
               unstash 'dynamics'
             }
-            sh "ls -latr neoload_project"
             sh "cat neoload_project/d.overrides.yaml"
-            sh "neoload project --path ./neoload_project/ upload"
+            sh "neoload --debug project --path ./neoload_project/ upload"
             sh "neoload status"
           }
         }
