@@ -89,7 +89,7 @@ variables:
     value: 35.153.194.37
 servers:
 - name: ushahidi
-  host: ${app_server_hostname}
+  host: \${app_server_hostname}
             """)
               stash includes: 'd.*.yaml', name: 'dynamics'
             }
