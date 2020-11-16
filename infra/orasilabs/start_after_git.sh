@@ -18,4 +18,4 @@ cd $HOME_DIR/startup/neoload-ci-training && infra/local_jenkins/start.sh $@
 echo "----------------------------------------------------------"
 echo "--  COPY THE JENKINS TOKEN ABOVE!!!"
 echo "----------------------------------------------------------"
-read -p "Once you copy this token, press enter to close this window"
+read -n1 -s -p "Once you copy this token, press enter to close this window"
