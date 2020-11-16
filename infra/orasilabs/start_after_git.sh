@@ -14,5 +14,5 @@ export JENKINS_HTTP_PORT=$JENKINS_HTTP_PORT
 export NLW_HOST=$NLW_HOST
 export NLW_HOST_IP=$NLW_HOST_IP
 # every time this VM is booted, run the initial Jenkins setup (persists data between sessions)
-cd $HOME_DIR/startup/neoload-ci-training && infra/local_jenkins/start.sh $@
-cd $HOME_DIR/startup/neoload-ci-training && infra/local_jenkins/startup_after_pause.sh
+#cd $HOME_DIR/startup/neoload-ci-training && infra/local_jenkins/start.sh $@
+cd $HOME_DIR/startup/neoload-ci-training && infra/orasilabs/startup_after_pause.sh
