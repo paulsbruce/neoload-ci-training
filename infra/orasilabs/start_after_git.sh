@@ -15,7 +15,4 @@ export NLW_HOST=$NLW_HOST
 export NLW_HOST_IP=$NLW_HOST_IP
 # every time this VM is booted, run the initial Jenkins setup (persists data between sessions)
 cd $HOME_DIR/startup/neoload-ci-training && infra/local_jenkins/start.sh $@
-echo "----------------------------------------------------------"
-echo "--  COPY THE JENKINS TOKEN ABOVE!!!"
-echo "----------------------------------------------------------"
-read -n1 -s -p "Once you copy this token, press enter to close this window"
+cd $HOME_DIR/startup/neoload-ci-training && infra/local_jenkins/startup_after_pause.sh
