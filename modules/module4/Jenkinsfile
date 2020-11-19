@@ -52,7 +52,7 @@ pipeline {
               if(zone_id == null)
                 error "No zones with available infrastructure were found! Please run 'Start Infra' job."
 
-              sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario mockScenario createorpatch 'example-Jenkins-module4'"
+              sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario mockScenario createorpatch 'example-Jenkins-module4-${env.agent_name}'"
             }
           }
         }

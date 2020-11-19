@@ -56,7 +56,7 @@ pipeline {
               if("null".equals(zone_id) || !zone_id?.trim())
                 error "No zones with available infrastructure were found! Please run 'Start Infra' job."
 
-              sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-moduleDynatrace'"
+              sh "neoload test-settings --zone ${zone_id} --lgs 1 --scenario sanityScenario createorpatch 'example-Jenkins-moduleDynatrace-${env.agent_name}'"
             }
           }
         }
