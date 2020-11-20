@@ -6,7 +6,7 @@ RUN addgroup -g 993 -S jenkins && adduser --uid 997 -S jenkins -G jenkins && pas
 RUN echo "jenkins ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/jenkins && chmod 0440 /etc/sudoers.d/jenkins
 
 # add tools to help parse output of CLI (nice to have)
-RUN apk add -q jq
+RUN apk add -q jq py3-lxml
 
 # pre-install NeoLoad CLI
 WORKDIR /opt/neoload
