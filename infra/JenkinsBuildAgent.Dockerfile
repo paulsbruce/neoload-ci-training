@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 
 # add the Jenkins user to container for file permissions to pip install neoload
 RUN apk add -q git shadow sudo
@@ -8,10 +8,10 @@ RUN echo "jenkins ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/jenkins && chmod 044
 # add tools to help parse output of CLI (nice to have)
 RUN apk add -q jq
 
-RUN apk add --no-cache --virtual .build-deps gcc libc-dev libxslt-dev && \
-    apk add --no-cache libxslt && \
-    pip install --no-cache-dir lxml>=3.5.0 && \
-    apk del .build-deps
+#RUN apk add --no-cache --virtual .build-deps gcc libc-dev libxslt-dev && \
+#    apk add --no-cache libxslt && \
+#    pip install --no-cache-dir lxml>=3.5.0 && \
+#    apk del .build-deps
 
 
 # pre-install NeoLoad CLI
