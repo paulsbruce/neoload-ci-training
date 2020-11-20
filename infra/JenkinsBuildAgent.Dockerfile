@@ -8,6 +8,8 @@ RUN echo "jenkins ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/jenkins && chmod 044
 # add tools to help parse output of CLI (nice to have)
 RUN apk add -q jq
 
+RUN apk add -q libxml2-dev libxslt-dev
+
 #RUN apk add --no-cache --virtual .build-deps gcc libc-dev libxslt-dev && \
 #    apk add --no-cache libxslt && \
 #    pip install --no-cache-dir lxml>=3.5.0 && \
