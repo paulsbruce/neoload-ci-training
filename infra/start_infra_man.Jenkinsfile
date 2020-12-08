@@ -34,7 +34,7 @@ pipeline {
       agent {
         docker {
           image "${env.docker_label}:latest"
-          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -e VM_HOST_INT_IP=${env.VM_HOST_INT_IP} -u root --privileged -v /var/run/docker.sock:/var/run/docker.sock"
+          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -e VM_HOST_INT_IP=${env.VM_HOST_INT_IP} -e VM_HOST_EXT_IP=${env.VM_HOST_EXT_IP} -u root --privileged -v /var/run/docker.sock:/var/run/docker.sock"
         }
       }
       stages {
@@ -52,7 +52,8 @@ pipeline {
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
 
-              env.pub_ip = "${env.VM_HOST_INT_IP}" //sh(script: "curl ifconfig.me", returnStdout: true).trim()
+              env.host_ip = "${env.VM_HOST_INT_IP}" //sh(script: "curl ifconfig.me", returnStdout: true).trim()
+              env.host_ip = "${env.VM_HOST_EXT_IP}"
 
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
                 common_params = "-d --rm --label manual-infra -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} --add-host=nlweb.shared:${env.host_ip}"
