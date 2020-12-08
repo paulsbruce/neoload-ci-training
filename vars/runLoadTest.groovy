@@ -55,7 +55,7 @@ def call(Map params) {
             steps {
               sh 'neoload --version'
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
-                sh "neoload login --url ${env.api_url} $NLW_TOKEN"
+                sh 'neoload login --url ${env.api_url} $NLW_TOKEN' // single-quotes to respect proper interpolation
               }
               script {
                 def zone_id = env.zone_id
