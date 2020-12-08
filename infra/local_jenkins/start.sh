@@ -73,7 +73,7 @@ fi
 VM_HOST_INT_IP=$(ifconfig eth0 | grep "inet " | awk '{print $2}')
 echo "VM_HOST_INT_IP: $VM_HOST_INT_IP"
 
-VM_HOST_EXT_IP=$(curl ifconfig.me)
+VM_HOST_EXT_IP=$(curl -sS ifconfig.me)
 echo "VM_HOST_EXT_IP: $VM_HOST_EXT_IP"
 
 echo "Starting Docker-in-Docker container"
