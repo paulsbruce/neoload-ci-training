@@ -12,7 +12,7 @@ def call(Map params) {
       full_test_duration_mins = params.get('duration',1)
       sanity_scenario_name = params.get('sanity',null)
       load_scenario_name = params.get('scenario',null)
-      test_settings_name = params.get('job','example-Jenkins')
+      test_settings_name = params.get('job','shared')
       project_yaml_file = params.get('project_yaml',null)
       lg_count = params.get('lgs',1)
       test_dir = params.get('test_dir','.')
@@ -32,7 +32,7 @@ def call(Map params) {
             sh "uname -a"
             env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
             env.agent_name = "${env.VM_HOST_EXT_IP}" // sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
-            env.test_settings_name = "${env.agent_name}-${JOB_NAME}-${env.agent_name}"
+            env.test_settings_name_full = "${env.test_settings_name}-${JOB_NAME}-${env.agent_name}"
             if(!isNullOrEmpty(env.project_yaml_file)) {
               env.project_yaml_file_and_comma = "${env.project_yaml_file},"
             }
@@ -66,7 +66,7 @@ def call(Map params) {
                 if(isNullOrEmpty(zone_id))
                   error "No zones with available infrastructure were found! Please run 'Start Infra' job."
 
-                sh "neoload test-settings --zone ${zone_id} --lgs ${env.lg_count} --scenario ${env.full_scenario_name} createorpatch '${env.test_settings_name}'"
+                sh "neoload test-settings --zone ${zone_id} --lgs ${env.lg_count} --scenario ${env.full_scenario_name} createorpatch '${env.test_settings_name_full}'"
               }
             }
           }
