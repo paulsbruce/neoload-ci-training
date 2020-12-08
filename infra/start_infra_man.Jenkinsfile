@@ -41,6 +41,10 @@ pipeline {
         stage('Start docker load infra') {
           steps {
             script {
+              
+              sh "apk update && apk add --no-cache docker-cli"
+              sh "which docker"
+
               def zone_id = env.zone_id
               if(zone_id.trim().toLowerCase().equals("null")) zone_id = ""
 
