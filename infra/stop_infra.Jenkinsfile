@@ -39,6 +39,9 @@ pipeline {
       stages {
         stage('NeoLoad login') {
           steps {
+            sh "apk update && apk add --no-cache docker-cli"
+            sh "which docker"
+
             sh 'neoload --version'
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"
