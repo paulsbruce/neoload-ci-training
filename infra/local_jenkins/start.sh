@@ -92,6 +92,7 @@ docker container run \
   --volume dind-image:/var/lib/docker/image \
   --volume dind-containers:/var/lib/docker/containers \
   --publish 2376:2376 \
+  --publish 7100-7110:7100-7110 \
   docker:dind \
   1>/dev/null
 
