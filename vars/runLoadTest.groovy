@@ -83,6 +83,7 @@ scenarios:
       increment_users: 1
       increment_every: 5s
       duration: ${env.full_test_duration_mins}m
+      stop_after: 30s
 sla_profiles:
 - name: geo_3rdparty_sla
   description: SLAs for cached queries, error rates
@@ -110,7 +111,7 @@ sla_profiles:
                     wrap([$class: 'BuildUser']) {
                       sanityCode = sh(script: """neoload run \
                             --scenario \"${env.sanity_scenario_name}\" \
-                            --name \"sanity-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
+                            --name \"sanity-${env.test_settings_name_full}\" \
                             --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
                             --as-code ${env.project_yaml_file_and_comma}d.overrides.yaml \
                             """, returnStatus: true)
@@ -138,7 +139,7 @@ sla_profiles:
                     wrap([$class: 'BuildUser']) {
                       sh """neoload run \
                         --scenario \"${env.actual_scenario_name}\" \
-                        --name \"fullTest-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
+                        --name \"fullTest-${env.test_settings_name_full}\" \
                         --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
                         --detached \
                         --as-code ${env.project_yaml_file_and_comma}d.overrides.yaml
