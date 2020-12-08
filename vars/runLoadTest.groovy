@@ -103,7 +103,7 @@ sla_profiles:
           stage('Run a sanity scenario') {
             steps {
               script {
-                sh "printenv"
+                //sh "printenv"
                 if(!env.sanity_scenario_name.isEmpty()) {
                   sanityCode = 3 // default to something absurd
                   try {
