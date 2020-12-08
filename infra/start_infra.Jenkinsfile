@@ -51,8 +51,6 @@ pipeline {
               if(zone_id.trim().length() < 1) // dynamically pick a zone
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
-
-              env.this_vm_ip = "${env.VM_HOST_INT_IP}" //sh(script: "curl ifconfig.me", returnStdout: true).trim()
               env.this_vm_ip = "${env.VM_HOST_EXT_IP}"
 
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
