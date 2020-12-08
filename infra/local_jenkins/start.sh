@@ -70,6 +70,9 @@ if [ -z "$(docker volume ls -q --filter 'name=dind-containers')" ]; then
   docker volume create --label "dind=yes" dind-containers
 fi
 
+VM_HOST_INT_IP=$(ifconfig eth0 | grep "inet " | awk '{print $2}')
+echo "VM_HOST_INT_IP: $VM_HOST_INT_IP"
+
 echo "Starting Docker-in-Docker container"
 docker pull -q docker:dind
 docker container run \
@@ -80,6 +83,7 @@ docker container run \
   --privileged \
   --network jenkins \
   --network-alias docker \
+  --env VM_HOST_INT_IP=$VM_HOST_INT_IP \
   --env DOCKER_TLS_CERTDIR=/certs \
   --volume jenkins-docker-certs:/certs/client \
   --volume jenkins-home:/var/jenkins_home \
@@ -100,6 +104,7 @@ function run_jenkins_container() {
     --rm \
     --detach \
     --network jenkins \
+    --env VM_HOST_INT_IP=$VM_HOST_INT_IP \
     --env DOCKER_HOST=$DOCKER_TCP_URI \
     --env DOCKER_CERT_PATH=/certs/client \
     --env DOCKER_TLS_VERIFY=1 \
