@@ -52,13 +52,13 @@ pipeline {
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
 
-              env.host_ip = "${env.VM_HOST_INT_IP}" //sh(script: "curl ifconfig.me", returnStdout: true).trim()
-              env.host_ip = "${env.VM_HOST_EXT_IP}"
+              env.this_vm_ip = "${env.VM_HOST_INT_IP}" //sh(script: "curl ifconfig.me", returnStdout: true).trim()
+              env.this_vm_ip = "${env.VM_HOST_EXT_IP}"
 
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
                 common_params = "-d --rm --label manual-infra -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} --add-host=nlweb.shared:${env.host_ip}"
                 sh "docker run --name man_ctrl -e LEASE_SERVER=NLWEB -e MODE=Managed ${common_params} neotys/neoload-controller"
-                sh "docker run --name man_lg1 -p 7101:7100 -e LG_HOST=${env.pub_ip} -e LG_PORT=7101 ${common_params} neotys/neoload-loadgenerator"
+                sh "docker run --name man_lg1 -p 7101:7100 -e LG_HOST=${env.this_vm_ip} -e LG_PORT=7101 ${common_params} neotys/neoload-loadgenerator"
               }
 
             }
