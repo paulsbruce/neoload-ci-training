@@ -5,7 +5,7 @@ pipeline {
     docker_label="nlclidocker"
     nlw_host="nlweb.shared"
     api_url="http://${env.nlw_host}:8080"
-    zone_id="defaultzone" //"${ZONE_ID}"
+    zone_id="${ZONE_ID}"
   }
 
   stages {

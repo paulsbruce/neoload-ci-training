@@ -5,7 +5,7 @@ pipeline {
     docker_label="nlclidocker"
     nlw_host="nlweb.shared"
     api_url="http://${env.nlw_host}:8080"
-    zone_id="${ZONE_ID}"
+    zone_id="defaultzone" //"${ZONE_ID}"
   }
 
   stages {
@@ -38,14 +38,6 @@ pipeline {
         }
       }
       stages {
-        stage('NeoLoad login') {
-          steps {
-            sh 'neoload --version'
-            withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
-              sh "neoload login --url ${env.api_url} $NLW_TOKEN"
-            }
-          }
-        }
         stage('Start docker load infra') {
           steps {
             script {
@@ -55,12 +47,15 @@ pipeline {
               if(zone_id.trim().length() < 1) // dynamically pick a zone
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
-              sh "neoload test-settings --zone ${zone_id} --lgs 2 --scenario sanityScenario createorpatch 'infra-harness-${env.agent_name}'"
+              env.pub_ip = sh(script: "curl ifconfig.me", returnStdout: true).trim()
+
+              withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
+                sh "docker run -d --rm --name man_ctrl --label infra=manual -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e LEASE_SERVER=NLWEB -e MODE=Managed -e ZONE=${env.zone_id} --add-host=nlweb.shared:${env.host_ip} neotys/neoload-controller"
+                sh "docker run -d --rm --name man_lg1 --label infra=manual -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} -p 7101:7100 -e LG_HOST=${env.pub_ip} -e LG_PORT=7101 neotys/neoload-loadgenerator"
+                sh "docker run -d --rm --name man_lg2 --label infra=manual -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} -p 7102:7100 -e LG_HOST=${env.pub_ip} -e LG_PORT=7102 neotys/neoload-loadgenerator"
+              }
+
             }
-
-            sh "neoload docker --addhosts='nlweb.shared=${env.host_ip}' attach"
-
-            sh "neoload test-settings delete cur"
           }
         }
       }
