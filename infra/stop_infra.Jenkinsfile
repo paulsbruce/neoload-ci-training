@@ -51,10 +51,10 @@ pipeline {
         stage('Stop docker load infra') {
           steps {
             sh "neoload docker --all detach"
-            try {
+            script { try {
               sh "docker ps -a -q --filter 'label=manual-infra' | grep -q . && docker stop \$(docker ps -a -q --filter 'label=manual-infra' --format '{{.ID}}') > /dev/null 2>&1"
             } catch(e) {
-            }
+            }}
           }
         }
       }
