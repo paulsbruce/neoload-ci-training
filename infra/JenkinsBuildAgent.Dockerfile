@@ -10,12 +10,6 @@ RUN apk add -q jq
 
 RUN apk add --update --no-cache g++ gcc libxml2-dev libxslt-dev python3-dev libffi-dev openssl-dev make
 
-#RUN apk add --no-cache --virtual .build-deps gcc libc-dev libxslt-dev && \
-#    apk add --no-cache libxslt && \
-#    pip install --no-cache-dir lxml>=3.5.0 && \
-#    apk del .build-deps
-
-
 # pre-install NeoLoad CLI
 WORKDIR /opt/neoload
 RUN git clone --single-branch --branch topic-report-command https://github.com/Neotys-Labs/neoload-cli.git

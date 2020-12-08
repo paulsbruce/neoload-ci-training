@@ -31,7 +31,7 @@ def call(Map params) {
 
             sh "uname -a"
             env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
-            env.agent_name = sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
+            env.agent_name = "${env.VM_HOST_EXT_IP}" // sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
             env.test_settings_name = "${env.agent_name}-${JOB_NAME}-${env.agent_name}"
             if(!isNullOrEmpty(env.project_yaml_file)) {
               env.project_yaml_file_and_comma = "${env.project_yaml_file},"
