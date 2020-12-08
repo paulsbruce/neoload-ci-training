@@ -184,14 +184,12 @@ sla_profiles:
                         sh """neoload report --filter='timespan=${env.reporting_timespan}' \
                               --template builtin:transactions-csv \
                               --out-file reports/neoload-transactions.csv \
-                              --max-rps 5 \
                               cur
                          """
 
                         sh """neoload report --filter='timespan=${env.reporting_timespan}' \
                               --template reporting/jinja/sample-custom-report.html.j2 \
                               --out-file reports/neoload-results.html \
-                              --max-rps 5 \
                               cur
                          """
                         publishHTML (target: [
@@ -207,7 +205,6 @@ sla_profiles:
                               --template reporting/jinja/sample-trends-report.html.j2 \
                               --out-file reports/neoload-trends.html \
                               --type trends \
-                              --max-rps 5 \
                               cur
                          """
                         publishHTML (target: [
