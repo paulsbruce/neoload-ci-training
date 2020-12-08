@@ -57,8 +57,8 @@ pipeline {
 
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
                 common_params = "-d --rm --label manual-infra -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} --add-host=nlweb.shared:${env.host_ip}"
-                sh "docker run --name man_ctrl -e LEASE_SERVER=NLWEB -e MODE=Managed ${common_params} neotys/neoload-controller"
-                sh "docker run --name man_lg1 -p 7101:7100 -e LG_HOST=${env.this_vm_ip} -e LG_PORT=7101 ${common_params} neotys/neoload-loadgenerator"
+                sh "docker run --name man_ctrl -h ${env.this_vm_ip}_ctrl -e LEASE_SERVER=NLWEB -e MODE=Managed ${common_params} neotys/neoload-controller"
+                sh "docker run --name man_lg1 -h ${env.this_vm_ip}_lg1 -p 7101:7100 -e LG_HOST=${env.this_vm_ip} -e LG_PORT=7101 ${common_params} neotys/neoload-loadgenerator"
               }
 
             }
