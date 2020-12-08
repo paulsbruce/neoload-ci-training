@@ -41,7 +41,7 @@ pipeline {
         stage('Start docker load infra') {
           steps {
             script {
-              
+
               sh "apk update && apk add --no-cache docker-cli"
               sh "which docker"
 
@@ -52,11 +52,12 @@ pipeline {
                 zone_id = sh(script: "neoload zones | jq '[.[]|select((.controllers|length<1) and (.loadgenerators|length<1) and (.type==\"STATIC\"))][0] | .id' -r", returnStdout: true).trim()
 
               env.pub_ip = sh(script: "curl ifconfig.me", returnStdout: true).trim()
+              common_params = "-d --rm --label manual-infra -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} --add-host=nlweb.shared:${env.host_ip}"
 
               withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
-                sh "docker run -d --rm --name man_ctrl --label manual-infra -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e LEASE_SERVER=NLWEB -e MODE=Managed -e ZONE=${env.zone_id} --add-host=nlweb.shared:${env.host_ip} neotys/neoload-controller"
-                sh "docker run -d --rm --name man_lg1 --label manual-infra -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} -p 7101:7100 -e LG_HOST=${env.pub_ip} -e LG_PORT=7101 neotys/neoload-loadgenerator"
-                sh "docker run -d --rm --name man_lg2 --label manual-infra -e NEOLOADWEB_URL=${env.api_url} -e NEOLOADWEB_TOKEN=$NLW_TOKEN -e ZONE=${env.zone_id} -p 7102:7100 -e LG_HOST=${env.pub_ip} -e LG_PORT=7102 neotys/neoload-loadgenerator"
+                sh "docker run --name man_ctrl -e LEASE_SERVER=NLWEB -e MODE=Managed ${common_params} neotys/neoload-controller"
+                sh "docker run --name man_lg1 -p 7101:7100 -e LG_HOST=${env.pub_ip} -e LG_PORT=7101 ${common_params} neotys/neoload-loadgenerator"
+                sh "docker run --name man_lg2 -p 7102:7100 -e LG_HOST=${env.pub_ip} -e LG_PORT=7102 ${common_params} neotys/neoload-loadgenerator"
               }
 
             }
