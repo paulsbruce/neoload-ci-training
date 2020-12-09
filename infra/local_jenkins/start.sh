@@ -130,7 +130,7 @@ run_jenkins_container ""
 
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
 
-#docker exec -i jenkins-blueocean bash -c "echo 'admin' > /var/jenkins_home/secrets/initialAdminPassword"
+docker exec -i jenkins-blueocean bash -c "echo 'admin' > /var/jenkins_home/secrets/initialAdminPassword"
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
 source "`dirname $0`"/print_jenkins_password.sh
