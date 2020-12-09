@@ -144,6 +144,7 @@ source "`dirname $0`"/wait_for_jenkins_up.sh
 docker exec -i jenkins-blueocean bash -c "echo 'admin' > /var/jenkins_home/secrets/initialAdminPassword"
 docker stop jenkins-blueocean 1>/dev/null
 run_jenkins_container $JENKINS_ARGS
+source "`dirname $0`"/wait_for_jenkins_up.sh
 
 source "`dirname $0`"/print_jenkins_password.sh
 
