@@ -129,7 +129,7 @@ docker pull -q jenkinsci/blueocean:latest
 run_jenkins_container ""
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
-docker exec -i jenkins-blueocean bash -c "sed -i 's/<useSecurity>true</useSecurity>/<useSecurity>false</useSecurity>/g' /var/jenkins_home/config.xml"
+docker exec -i jenkins-blueocean bash -c "sed -i 's/\<useSecurity\>true\<\/useSecurity\>/\<useSecurity\>false\<\/useSecurity\>/g' /var/jenkins_home/config.xml"
 
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
 
