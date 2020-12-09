@@ -130,16 +130,21 @@ run_jenkins_container ""
 
 docker exec -it --user root jenkins-blueocean apk add -q --no-progress --upgrade bind-tools curl &>/dev/null
 
-docker exec -i jenkins-blueocean bash -c "echo 'admin' > /var/jenkins_home/secrets/initialAdminPassword"
-
 source "`dirname $0`"/wait_for_jenkins_up.sh
 source "`dirname $0`"/print_jenkins_password.sh
 source "`dirname $0`"/start_after.sh
 
+JENKINS_ARGS="-Djenkins.install.runSetupWizard=false -Djenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=true -Dhudson.model.UpdateCenter.never=true -Djenkins.ui.refresh=true"
+
 docker stop jenkins-blueocean 1>/dev/null
-run_jenkins_container "-Djenkins.install.runSetupWizard=false -Djenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=true -Dhudson.model.UpdateCenter.never=true -Djenkins.ui.refresh=true"
+run_jenkins_container $JENKINS_ARGS
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
+
+docker exec -i jenkins-blueocean bash -c "echo 'admin' > /var/jenkins_home/secrets/initialAdminPassword"
+docker stop jenkins-blueocean 1>/dev/null
+run_jenkins_container $JENKINS_ARGS
+
 source "`dirname $0`"/print_jenkins_password.sh
 
 
