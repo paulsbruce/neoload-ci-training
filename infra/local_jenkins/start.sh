@@ -81,7 +81,6 @@ docker pull -q docker:dind
 docker container run \
   --name jenkins-docker \
   --label 'jenkins' \
-  --rm \
   --detach \
   --privileged \
   --network jenkins \
