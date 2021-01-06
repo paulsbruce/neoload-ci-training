@@ -58,6 +58,15 @@ scenarios:
       increment_every: 5s
       duration: ${env.full_test_duration_mins}m
             """)
+            writeFile(file: "d.slas.yaml", text:"""
+sla_profiles:
+- name: geo_3rdparty_sla
+  description: SLAs for cached queries, error rates
+  thresholds:
+  - error-rate warn >= 10% fail >= 30% per interval
+  - avg-resp-time warn >= 10ms fail >= 20ms per interval
+  - error-rate fail >= 20% per test
+            """)
             stash includes: 'd.*.yaml', name: 'dynamics'
           }
         }
@@ -83,7 +92,7 @@ scenarios:
                         --scenario sanityScenario \
                         --name \"sanity-${env.JOB_NAME}-${env.BUILD_NUMBER}-${env.agent_name}\" \
                         --description \"Started by Jenkins user $BUILD_USER on ${env.agent_name}\" \
-                        --as-code default_mocks.yaml,d.overrides.yaml \
+                        --as-code default_mocks.yaml,d.overrides.yaml,d.slas.yaml \
                         """, returnStatus: true)
                 }
               } catch(error) {
