@@ -6,8 +6,8 @@ pipeline {
     nlw_host="nlweb.shared"
     api_url="http://${env.nlw_host}:8080"
     zone_id="${ZONE_ID}"
-    full_test_max_vus = 5
-    full_test_duration_mins = 3
+    full_test_max_vus = 20
+    full_test_duration_mins = 10
     reporting_timespan='10%-90%'
   }
 
