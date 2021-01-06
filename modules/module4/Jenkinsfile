@@ -35,6 +35,8 @@ pipeline {
       stages {
         stage('Prepare agent') {
           steps {
+            //sh 'rm -rf * && git clone https://github.com/paulsbruce/neoload-ci-training.git .'
+
             sh 'neoload --version'
             withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
               sh "neoload login --url ${env.api_url} $NLW_TOKEN"

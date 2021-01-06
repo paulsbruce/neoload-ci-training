@@ -1,117 +1,119 @@
-pipeline {
-  agent none
+  pipeline {
+    agent none
 
-  environment {
-    docker_label="nljenkinsagent"
-    nlw_host="nlweb.shared"
-    api_url="http://${env.nlw_host}:8080"
-    zone_id="defaultzone"
-  }
-
-  options {
-      // Only keep the 10 most recent builds
-      buildDiscarder(logRotator(numToKeepStr:'10'))
-  }
-
-  stages {
-    stage ('Prep workspace') {
-      agent any
-      steps {
-        cleanWs()
-        script {
-          sh "uname -a"
-          env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
-          env.agent_name = "${env.VM_HOST_EXT_IP}" // sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
-        }
-      }
+    environment {
+      docker_label="nljenkinsagent"
+      nlw_host="nlweb.shared"
+      api_url="http://${env.nlw_host}:8080"
+      zone_id="defaultzone"
     }
-    stage('Attach Worker') {
-      agent {
-        docker {
-          image "${env.docker_label}:latest"
-          args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -e PYTHONUNBUFFERED=1"
+
+    options {
+        // Only keep the 10 most recent builds
+        buildDiscarder(logRotator(numToKeepStr:'10'))
+    }
+
+    stages {
+      stage ('Prep workspace') {
+        agent any
+        steps {
+          cleanWs()
+          script {
+            sh "uname -a"
+            env.host_ip = sh(script: "getent hosts ${env.nlw_host} | head -n1 | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])'", returnStdout: true)
+            env.agent_name = "${env.VM_HOST_EXT_IP}" // sh(script: "uname -a | tr -s ' ' | cut -d ' ' -f2", returnStdout: true)
+          }
         }
       }
-      stages {
-        stage('Prepare agent') {
-          steps {
-            sh 'neoload --version'
-            withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
-              sh "neoload login --url ${env.api_url} $NLW_TOKEN"
+      stage('Attach Worker') {
+        agent {
+          docker {
+            image "${env.docker_label}:latest"
+            args "--add-host ${env.nlw_host}:${env.host_ip} -e HOME=${env.WORKSPACE} -e PYTHONUNBUFFERED=1"
+          }
+        }
+        stages {
+          stage('Prepare agent') {
+            steps {
+              sh 'rm -rf * && git clone https://github.com/paulsbruce/neoload-ci-training.git .'
+
+              sh 'neoload --version'
+              withCredentials([string(credentialsId: 'NLW_TOKEN', variable: 'NLW_TOKEN')]) {
+                sh "neoload login --url ${env.api_url} $NLW_TOKEN"
+              }
             }
           }
-        }
-        stage('Prepare Neoload test') {
-          steps {
-            sh "neoload test-settings --zone ${env.zone_id} --lgs 1 --scenario mockScenario createorpatch 'example-Jenkins-module4-${env.agent_name}'"
+          stage('Prepare Neoload test') {
+            steps {
+              sh "neoload test-settings --zone ${env.zone_id} --lgs 1 --scenario mockScenario createorpatch 'example-Jenkins-module4-${env.agent_name}'"
+            }
           }
-        }
-        stage('Prepare Test Assets') {
-          steps {
-            writeFile(file: "d.servers.yaml", text:"""
-servers:
-- name: geolookup_mock_host
-  host: httpbin.org
-  scheme: https
-            """)
+          stage('Prepare Test Assets') {
+            steps {
+              writeFile(file: "d.servers.yaml", text:"""
+  servers:
+  - name: geolookup_mock_host
+    host: httpbin.org
+    scheme: https
+              """)
 
-            writeFile(file: "d.scenarios.yaml", text:"""
-populations:
-- name: popGetsMock
-  user_paths:
-  - name: ex_2_0_geosearch_get_mock
-
-scenarios:
-- name: mockScenario
+              writeFile(file: "d.scenarios.yaml", text:"""
   populations:
   - name: popGetsMock
-    constant_load:
-      users: 2
-      duration: 1m
-            """)
+    user_paths:
+    - name: ex_2_0_geosearch_get_mock
 
-            writeFile(file: "d.variables.yaml", text:"""
-variables:
-- constant:
-    name: geoformat
-    value: xml
-- constant:
-    name: geocontains
-    value: 'place'
-            """)
+  scenarios:
+  - name: mockScenario
+    populations:
+    - name: popGetsMock
+      constant_load:
+        users: 2
+        duration: 1m
+              """)
 
-            writeFile(file: "d.inludes.yaml", text:"""
-includes:
-- paths/geosearch_get_mock.yaml
-- d.servers.yaml
-- d.scenarios.yaml
-- d.variables.yaml
-            """)
+              writeFile(file: "d.variables.yaml", text:"""
+  variables:
+  - constant:
+      name: geoformat
+      value: xml
+  - constant:
+      name: geocontains
+      value: 'place'
+              """)
 
-            stash includes: 'd.*.yaml', name: 'dynamics'
-          }
-        }
-        stage('Upload Test Assets') {
-          steps {
-            dir('tests/neoload_projects/example_1/') {
-              unstash 'dynamics'
+              writeFile(file: "d.inludes.yaml", text:"""
+  includes:
+  - paths/geosearch_get_mock.yaml
+  - d.servers.yaml
+  - d.scenarios.yaml
+  - d.variables.yaml
+              """)
+
+              stash includes: 'd.*.yaml', name: 'dynamics'
             }
-            sh "neoload project --path tests/neoload_projects/example_1/ upload"
-            sh "neoload status"
           }
-        }
-        stage('Run Test') {
-          steps {
-            sh "neoload run --as-code default.yaml,d.includes.yaml"
-          }
-          post {
-              always {
-                sh "neoload test-results junitsla"
-                junit testResults: 'junit-sla.xml', allowEmptyResults: true
+          stage('Upload Test Assets') {
+            steps {
+              dir('tests/neoload_projects/example_1/') {
+                unstash 'dynamics'
               }
+              sh "neoload project --path tests/neoload_projects/example_1/ upload"
+              sh "neoload status"
+            }
+          }
+          stage('Run Test') {
+            steps {
+              sh "neoload run --as-code default.yaml,d.includes.yaml"
+            }
+            post {
+                always {
+                  sh "neoload test-results junitsla"
+                  junit testResults: 'junit-sla.xml', allowEmptyResults: true
+                }
+            }
           }
         }
       }
     }
   }
-}
