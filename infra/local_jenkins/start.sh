@@ -145,13 +145,13 @@ source "`dirname $0`"/wait_for_jenkins_up.sh
 source "`dirname $0`"/print_jenkins_password.sh
 
 
-if [ -t 0 ]; then
-  if [ "$(which open)" ]; then
-    open $EXT_JENKINS_URL
-  elif [ "$(which xdg-open)" ]; then
-    xdg-open $EXT_JENKINS_URL
-  fi
-fi
+# if [ -t 0 ]; then
+#   if [ "$(which open)" ]; then
+#     open $EXT_JENKINS_URL
+#   elif [ "$(which xdg-open)" ]; then
+#     xdg-open $EXT_JENKINS_URL
+#   fi
+# fi
 
 echo "Pre-loading the latest load generator and controller Docker images"
 docker exec -it --user root jenkins-docker docker pull neotys/neoload-controller:latest
