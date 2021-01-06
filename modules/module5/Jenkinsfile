@@ -64,7 +64,7 @@ sla_profiles:
   description: SLAs for cached queries, error rates
   thresholds:
   - error-rate warn >= 10% fail >= 30% per interval
-  - avg-resp-time warn >= 10ms fail >= 20ms per interval
+  - avg-resp-time warn >= 20ms fail >= 40ms per interval
   - error-rate fail >= 20% per test
             """)
             stash includes: 'd.*.yaml', name: 'dynamics'
