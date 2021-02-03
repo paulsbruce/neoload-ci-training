@@ -50,7 +50,7 @@ if [ ! -f "$dt_config" ]; then
 fi
 if [ -f "$dt_config" ]; then
   if [ "$should_echo_infos" == "1" ]; then
-    echo "Found Dynatrace config in the file $dt_config"
+    echo "Found Dynatrace config"
   fi
   DYNATRACE_URL=$(cat $dt_config | head -1 | tr -d '\r' | tr -d '\n' | tr -d ' ')
   DYNATRACE_API_TOKEN=$(cat $dt_config | sed 1,1d | head -1 | tr -d '\r' | tr -d '\n' | tr -d ' ')
