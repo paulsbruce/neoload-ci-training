@@ -107,6 +107,7 @@ docker container run \
   --volume dind-containers:/var/lib/docker/containers \
   --publish 2376:2376 \
   --publish 7100-7110:7100-7110 \
+  --add-host gitbucket:$VM_HOST_INT_IP \
   docker:dind \
   1>/dev/null
 
@@ -130,6 +131,7 @@ function run_jenkins_container() {
     --volume jenkins-home:/var/jenkins_home \
     --volume jenkins-docker-certs:/certs/client:ro \
     --add-host nlweb.shared:$NLW_HOST_IP \
+    --add-host gitbucket:$VM_HOST_INT_IP \
     jenkinsci/blueocean:latest \
     1>/dev/null
   # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
