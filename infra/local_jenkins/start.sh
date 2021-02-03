@@ -9,6 +9,7 @@ set +x
 #echo "git_branch=$git_branch"
 
 # use a Neotys public ECR because dockerhub rate-limits suck
+# BE SPECIFIC ABOUT VERSION TAGS!!!
 DOCKERREPO_ROOT=public.ecr.aws/t5c5t1o4
 DOCKERIMAGE_DIND=$DOCKERREPO_ROOT/docker:dind
 DOCKERIMAGE_BLUEOCEAN=$DOCKERREPO_ROOT/blueocean:1.24.4
@@ -86,6 +87,7 @@ echo "VM_HOST_EXT_IP: $VM_HOST_EXT_IP"
 
 echo "Starting Docker-in-Docker container"
 docker pull -q $DOCKERIMAGE_DIND
+docker tag $DOCKERIMAGE_DIND docker:dind
 docker container run \
   --name jenkins-docker \
   --label 'jenkins' \
@@ -105,7 +107,7 @@ docker container run \
   --volume dind-containers:/var/lib/docker/containers \
   --publish 2376:2376 \
   --publish 7100-7110:7100-7110 \
-  $DOCKERIMAGE_DIND \
+  docker:dind \
   1>/dev/null
 
 function run_jenkins_container() {
@@ -128,12 +130,13 @@ function run_jenkins_container() {
     --volume jenkins-home:/var/jenkins_home \
     --volume jenkins-docker-certs:/certs/client:ro \
     --add-host nlweb.shared:$NLW_HOST_IP \
-    $DOCKERIMAGE_BLUEOCEAN \
+    jenkinsci/blueocean:latest \
     1>/dev/null
   # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
 }
 
 docker pull -q $DOCKERIMAGE_BLUEOCEAN
+docker tag $DOCKERIMAGE_BLUEOCEAN jenkinsci/blueocean:latest
 run_jenkins_container ""
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
