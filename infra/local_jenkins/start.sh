@@ -8,6 +8,14 @@ set +x
 #echo "git_repo_url=$git_repo_url"
 #echo "git_branch=$git_branch"
 
+# use a Neotys public ECR because dockerhub rate-limits suck
+DOCKERREPO_ROOT=public.ecr.aws/t5c5t1o4
+DOCKERIMAGE_DIND=$DOCKERREPO_ROOT/docker:dind
+DOCKERIMAGE_BLUEOCEAN=$DOCKERREPO_ROOT/blueocean:1.24.4
+DOCKERIMAGE_GITBUCKET=$DOCKERREPO_ROOT/gitbucket:4.35.3
+DOCKERIMAGE_CONTROLLER=$DOCKERREPO_ROOT/neoload-controller:7.7.0
+DOCKERIMAGE_LOADGENERATOR=$DOCKERREPO_ROOT/neoload-loadgenerator:7.7.0
+
 if [ -z "$JENKINS_HTTP_PORT" ]; then
   . "`dirname $0`"/../globals.sh
 fi
@@ -77,7 +85,7 @@ VM_HOST_EXT_IP=$(curl -sS ifconfig.me)
 echo "VM_HOST_EXT_IP: $VM_HOST_EXT_IP"
 
 echo "Starting Docker-in-Docker container"
-docker pull -q docker:dind
+docker pull -q $DOCKERIMAGE_DIND
 docker container run \
   --name jenkins-docker \
   --label 'jenkins' \
@@ -97,7 +105,7 @@ docker container run \
   --volume dind-containers:/var/lib/docker/containers \
   --publish 2376:2376 \
   --publish 7100-7110:7100-7110 \
-  docker:dind \
+  $DOCKERIMAGE_DIND \
   1>/dev/null
 
 function run_jenkins_container() {
@@ -120,12 +128,12 @@ function run_jenkins_container() {
     --volume jenkins-home:/var/jenkins_home \
     --volume jenkins-docker-certs:/certs/client:ro \
     --add-host nlweb.shared:$NLW_HOST_IP \
-    jenkinsci/blueocean:latest \
+    $DOCKERIMAGE_BLUEOCEAN \
     1>/dev/null
   # -Dhudson.model.DirectoryBrowserSupport.CSP=\"\"" \
 }
 
-docker pull -q jenkinsci/blueocean:latest
+docker pull -q $DOCKERIMAGE_BLUEOCEAN
 run_jenkins_container ""
 
 source "`dirname $0`"/wait_for_jenkins_up.sh
@@ -154,6 +162,11 @@ source "`dirname $0`"/print_jenkins_password.sh
 # fi
 
 echo "Pre-loading the latest load generator and controller Docker images"
-docker exec -it --user root jenkins-docker docker pull neotys/neoload-controller:latest
-docker exec -it --user root jenkins-docker docker pull neotys/neoload-loadgenerator:latest
+docker exec -it --user root jenkins-docker docker pull $DOCKERIMAGE_CONTROLLER
+docker exec -it --user root jenkins-docker docker tag $DOCKERIMAGE_CONTROLLER neotys/neoload-controller:latest
+docker exec -it --user root jenkins-docker docker pull $DOCKERIMAGE_LOADGENERATOR
+docker exec -it --user root jenkins-docker docker tag $DOCKERIMAGE_LOADGENERATOR neotys/neoload-loadgenerator:latest
+
+docker exec -it --user root jenkins-docker docker pull $DOCKERIMAGE_GITBUCKET
+docker exec -it --user root jenkins-docker docker tag $DOCKERIMAGE_GITBUCKET gitbucket/gitbucket:latest
 #wait
