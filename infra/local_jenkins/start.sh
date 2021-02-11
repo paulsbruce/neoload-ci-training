@@ -10,7 +10,7 @@ set +x
 
 # use a Neotys public ECR because dockerhub rate-limits suck
 # BE SPECIFIC ABOUT VERSION TAGS!!!
-DOCKERREPO_ROOT=public.ecr.aws/t5c5t1o4
+DOCKERREPO_ROOT=public.ecr.aws/neotys
 DOCKERIMAGE_DIND=$DOCKERREPO_ROOT/docker:dind
 DOCKERIMAGE_BLUEOCEAN=$DOCKERREPO_ROOT/blueocean:1.24.4
 DOCKERIMAGE_GITBUCKET=$DOCKERREPO_ROOT/gitbucket:4.35.3
@@ -80,6 +80,9 @@ if [ -z "$(docker volume ls -q --filter 'name=dind-containers')" ]; then
 fi
 
 VM_HOST_INT_IP=$(ifconfig eth0 | grep "inet " | awk '{print $2}')
+if [ -z "$VM_HOST_INT_IP" ]; then
+  VM_HOST_INT_IP=$(ifconfig wlp3s0 | grep "inet " | awk '{print $2}')
+fi
 echo "VM_HOST_INT_IP: $VM_HOST_INT_IP"
 
 VM_HOST_EXT_IP=$(curl -sS ifconfig.me)
