@@ -12,11 +12,11 @@ RUN apk add --update --no-cache g++ gcc libxml2-dev libxslt-dev python3-dev libf
 
 # pre-install NeoLoad CLI
 WORKDIR /opt/neoload
-RUN git clone --single-branch --branch topic-report-command https://github.com/Neotys-Labs/neoload-cli.git
-RUN cd neoload-cli && python3 -m pip install -q .
+#RUN git clone --single-branch --branch topic-report-command https://github.com/Neotys-Labs/neoload-cli.git
+#RUN cd neoload-cli && python3 -m pip install -q .
 
 # or run official version that doesn't yet include advanced reporting
-#RUN pip install -q neoload
+RUN pip install -q neoload
 
 # switch back to proper non-root user
 USER jenkins
