@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+if [ "$1" == "debug" ]; then set -x fi
 
 should_echo_infos=0
 if [ "$has_common_been_run" == "" ]; then
@@ -11,9 +12,6 @@ if [ -z "$has_common_been_run" ]; then
   export has_common_been_run=$has_common_been_run
 fi
 
-if [ "$1" == "debug" ]; then
-  $("set -x")
-fi
 RESET=
 if [ "$1" == "reset" ]; then
   RESET=reset
