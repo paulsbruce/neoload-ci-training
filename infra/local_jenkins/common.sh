@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-if [ "$1" == "debug" ]; then set -x fi
+if [ "$1" == "debug" ]; then set -x; fi
 
 should_echo_infos=0
 if [ "$has_common_been_run" == "" ]; then
