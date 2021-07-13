@@ -1,11 +1,11 @@
 #!/bin/bash
 
 AWS_REGION=us-east-1
-AWS_PUBLIC_REPO_ROOT=public.ecr.aws/t5c5t1o4
+AWS_PUBLIC_REPO_ROOT=public.ecr.aws/neotys
 
 aws ecr-public get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_PUBLIC_REPO_ROOT
 
-IMAGE_SPECS="jenkinsci/blueocean:1.24.4 docker:dind gitbucket/gitbucket:4.35.3 neotys/neoload-controller:7.7.0 neotys/neoload-loadgenerator:7.7.0"
+IMAGE_SPECS="jenkinsci/blueocean:1.24.4 docker:dind gitbucket/gitbucket:4.35.3 neotys/neoload-controller:7.7.0 neotys/neoload-loadgenerator:7.7.0 neotys/neoload-controller:7.10.0 neotys/neoload-loadgenerator:7.10.0"
 #IMAGE_SPECS="docker:dind"
 
 for spec in $IMAGE_SPECS; do
